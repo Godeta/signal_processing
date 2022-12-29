@@ -1,13 +1,13 @@
 # signal_processing
 Some exemples of signal processing with explanations.
-
+Note : DSP = Digital Signal Processing
 [Website](https://scilab-signal.carrd.co/)
 
-## Filter
-In the file "Filtre" you can see an exemple of how to make a filter using scilab.
+## Small_tests
+In the folder "small_tests" you can see simple exemples of different things related to DSP in Scilab
 
-## Spectrum
-In the file "Spectre" you can see an exemple of a signal ploted relative to time and relative to frequency using the fourier transform.
+## Sensor project
+In the folder "sensor_data_processing" I will put all my data and code to process data from a sensor.
 
-## Patter detection in images
-In the file "intercorrelation" you can see an exemple of how to detect patterns in images using signal processing in scilab.
+## Patern detection in images
+In the folder"image_processing" you can see exemples of how to detect patterns in images using signal processing in scilab.
