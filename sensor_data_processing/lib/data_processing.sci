@@ -112,6 +112,44 @@ function result = medianFilter(x)
     result = z;
 endfunction
 
+
+//custom filter inspired by Laplacian, It's a pretty random thing because I failed to implement what I initially wanted
+function result = customLap(data)
+    n = 100;
+    // Initialize the Laplacian matrix
+    L = zeros(n, n);
+    
+    // Set the main diagonal elements to 1
+    L(1:n + 1:n^2) = 1;
+    
+    // Set the adjacent off-diagonal elements to -1
+    L(2:n + 1:n^2 - 1) = -0.4;
+    L(n + 1:n + 1:n^2 - n) = -0.4;
+    // Print the Laplacian matrix
+    y = zeros(n, 1);
+    // Perform the convolution -> revoir https://math.stackexchange.com/questions/3878457/creating-the-1d-laplacian-matrix 
+    for i = 1:n
+        y(i) = sum(L(i,:));
+    end
+    
+    result = conv(data, y,'same');
+endfunction
+
+//filtering using gauss parabola
+function result = gaussFilter(data, sizeOf)
+    x = [-sizeOf:sizeOf];
+   gauss = exp(-(x/sizeOf).^2); // une forme de gaussienne d'épaisseur environ 10, soit a peu près la même chose que la petite boite
+    gauss = gauss / sum(gauss); // Normalisation, pour que la convolution ne change pas la valeur moyenne
+    result = conv(data, gauss,'same');
+endfunction
+
+//fast root mean square
+function result = fMsqrt(data, sizeOf)
+    y = ones(1,sizeOf)
+    clin = conv(data.^2,y)
+    result = sqrt(clin/sum(y))
+endfunction
+
 /**
 Let's attempt to remove the effect of the line noise by using a moving average filter.
 

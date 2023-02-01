@@ -52,7 +52,7 @@ plot(t,u)
 
 PetiteBoite = ones(1,11)/11; // on va moyenner sur une zone qui va de -5 à +5, soit 11 points en comptant celui du milieu.
 u_m1 = conv(u,PetiteBoite,'same'); // l'argument 'same' assure que la taille du signal de sortie est la même que le signal d'entrée u
-plot(t,u_m1,'color','r'); //line et plot fonctionnent un peu pareil, sauf que line évite d'avoir a utiliser "hold on' (plot efface tout par défaut), mais line a moins d'options que plot
+plot(t,u_m1,'color','y'); //line et plot fonctionnent un peu pareil, sauf que line évite d'avoir a utiliser "hold on' (plot efface tout par défaut), mais line a moins d'options que plot
 
 GrosseBoite = ones(1,201)/201; //cette fois on va de -50 à +50 points.
 u_m2 = conv(u,GrosseBoite,'same');
@@ -65,40 +65,38 @@ u_lisse = conv(u, gauss,'same');
 //plot(t,u_m1,'r');
 plot(t,u_lisse, 'g');
 
-// -- test laplacian --
-
+//// -- test laplacian --
+//
 //// Define the size of the Laplacian matrix
 //n = length(u);
-//
+//n = 50;
 //// Initialize the Laplacian matrix
 //L = zeros(n, n);
 //
 //// Set the main diagonal elements to 1
-//L(1:n + 1:n^2) = 1;
+//L(1:n + 1:n^2) = -1;
 //
 //// Set the adjacent off-diagonal elements to -1
-//L(2:n + 1:n^2 - 1) = -1;
-//L(n + 1:n + 1:n^2 - n) = -1;
+//L(2:n + 1:n^2 - 1) = 1;
+//L(n + 1:n + 1:n^2 - n) = 1;
 //// Print the Laplacian matrix
-////disp(L);
-//
 //y = zeros(n, 1);
 //// Perform the convolution -> revoir https://math.stackexchange.com/questions/3878457/creating-the-1d-laplacian-matrix 
-//for i = 1:length(n)
-//    y(i) = sum(L(i,:) .* u);
+//for i = 1:n
+//    y(i) = sum(L(i,:) * u(i)*1/length(u));
 //end
 //
 //u_laplace = conv(u, y,'same');
-//plot(t,u_laplace, "p");
+//plot(t,u_laplace, "r");
 //test = "Laplace"
 
 // -- test Savitzky-Golay Filters -- 
 
-//u_sgolay = sgolayfilt(u, 3, 7); //sgolayfilt(u, 1, 17);
-//plot(t, u_sgolay, "br");
-//p = [3 0 0 0 0 0 0];
-//y = horner(p,x);
-//test = "sgolay"
+u_sgolay = sgolayfilt(u, 3, 7); //sgolayfilt(u, 1, 17);
+plot(t, u_sgolay, "br");
+p = [3 0 0 0 0 0 0];
+y = horner(p,x);
+test = "sgolay"
 
 
 // -- test Hampel filter --
@@ -125,7 +123,7 @@ plot(t,u_lisse, 'g');
 //    indice = indices;
 //endfunction
 //[u_hampel,ind] = hampel_filter_forloop(u, 10, 3);
-//plot(t, u_hampel, "k");
+//plot(t, u_hampel, "r");
 //y = ind;
 //test = "Hampel"
 
@@ -134,10 +132,10 @@ legend("Original","Moyenne petite ouverture", "Moyenne grande ouverture", "Gauss
 //visualiser les filtres appliqués
 figure;
 title("Affichage des filtres")
-plot(gauss)
-plot(PetiteBoite)
+plot(gauss, "g")
+plot(PetiteBoite,"b")
 plot(GrosseBoite)
-plot(y)
+plot(y,"r")
 
 legend("Gauss","Petite boite", "Grande boite", test);
 

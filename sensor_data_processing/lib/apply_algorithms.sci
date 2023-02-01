@@ -12,6 +12,7 @@
         if argn(2) < 2 || isempty(value2)
             value2 = -1;
         end
+        name = "undefined";
         /**
         process data here
         **/
@@ -24,6 +25,8 @@
         case 4 then
             result1 = medianFilter(value1);
             result2 =0;
+            name = "median";
+            
             //hampel filter
         case 5 then
             //function 
@@ -34,14 +37,37 @@
             else
                 result2=0;
             end
+            name = "hampel";
+            
             //moving average
         case 6 then
             result1 = moving_average(value1,10);
             result2 =0;
+            name = "average";
+            
             //Savitzky-Golay Filters
         case 7 then
             result1 = sgolayfilt(value1, 3, 7);
             result2=0;
+            name = "sgolay";
+            
+            //Custom filter inspired by Laplacian
+        case 8 then
+            result1 = customLap(value1);
+            result2=0;
+            name = "customlap";
+            
+            //Gauss filter
+        case 9 then
+            result1 = gaussFilter(value1,10);
+            result2=0;
+            name = "gauss";
+            
+            //fast root mean square
+        case 10 then
+            result1 = fMsqrt(value1, 30);
+            result2=0;
+            name = "fast root mean square";
     else
         result1=0;
         result2=0;
@@ -53,7 +79,8 @@
                 disp("Afficher ? "+ string(showChart));
                 figure;
                 plot2d(result1);
-                xtitle("Filtered data");
+                //nom plus ou moins unique pour comparer les données
+                xtitle(strcat(["Filter " name " data n° " string(value1(1)) "-" string(value1(100)) "-" string(value1(1000))]));
                 if(value2 ~=-1)
                     plot2d(value2);
                     end
@@ -88,6 +115,8 @@
                 //disp("Afficher ? "+ string(showChart));
                 figure;
                 plot2d(result1);
+                name = "convolution checked";
+                xtitle(strcat(["Filter " name " data n° " string(value1(1)) "-" string(value1(100)) "-" string(value1(1000))]));
                 if(value2 ~=-1)
                     plot2d(result1);
                     end
@@ -117,6 +146,8 @@
                 //disp("Afficher ? "+ string(showChart));
                 figure;
                 plot2d(result1);
+                name = "circular conv checked";
+                xtitle(strcat(["Filter " name " data n° " string(value1(1)) "-" string(value1(100)) "-" string(value1(1000))]));
                 if(value2 ~=-1)
                     plot2d(result1);
                     end
