@@ -3,6 +3,7 @@ In this file I will put all functions related to data processing
 Insirations : https://www.mathworks.com/help/signal/ug/signal-smoothing.html et https://www.mathworks.com/help/signal/index.html?s_tid=CRUX_lftnav 
 **/
 
+//convolution using a specified vector
 function result = convolution(data, weightVector, makeFilter)
     disp(weightVector)
     if argn(2) < 3 || isempty(makeFilter)
@@ -21,11 +22,12 @@ end
     result = conv(data,y);
 endfunction
 
+//circular convolution
 function result = circularConvolution(data, weightVector, makeFilter)
     if argn(2) < 3 || isempty(makeFilter)
             makeFilter = -1;
         end
-    if makeFilter then
+    if makeFilter==1 then
         order = weightVector(1);
         lf = weightVector(1);
         hf = weightVector(2);
@@ -34,11 +36,80 @@ function result = circularConvolution(data, weightVector, makeFilter)
     else
         y = weightVector;
 end
+    N = length(data);
+    L = length(y);
+    outputSize = N + L -1;
+    xpad = [data' zeros(1,outputSize-N)];
+    ypad = [y zeros(1,outputSize-L)];
+    fx = fft(xpad, 1, 1)
+    fy = fft(ypad)
+    ccirc = fft(fx.*fy,-1,1);
+    result = ccirc'(length(y):$,1);
+endfunction
 
+// -- test Hampel filter --
+//exemple use : data = hampel_filter_forloop(u, 10, 3);
+function result = hampel_filter_forloop(input_series, window_size, n_sigmas)
+    if(isempty(n_sigmas)) then
+    n_sigmas = 3;
+    end
+    n = length(input_series);
+    new_series = input_series;
+    k = 1.4826 // scale factor for Gaussian distribution
+    
+    indices = [0]
+    
+    for i=window_size:n-window_size
+        x0 = median(input_series((i - window_size+1):(i + window_size)))
+        S0 = k * median(abs(input_series((i - window_size+1):(i + window_size)) - x0))
+        if (abs(input_series(i) - x0) > n_sigmas * S0) then
+            new_series(i) = x0
+            cat(indices,i);
+            end
+    end
+    result= new_series;
+endfunction
+
+//the moving average is a convolution with an equally distributed vector so that the sum = 1, sizeOf is the size of our moving average
+function result = moving_average(data,sizeOf)
+    //default value of sizeOf
+    if(isempty(sizeOf) || sizeOf <1) then
+    sizeOf = 10
+    end
+    y = ones(1,sizeOf)/sizeOf;
     result = conv(data,y);
 endfunction
 
-function result = medFilt(data, N)
+//correlation based on a radar processing exemple I found in a pdf document on scilab
+function result = correlationR(data,sizeOf)
+    data_fold = mtlb_fliplr (data);
+    original_signal = ones(1,length(data)-1);
+    conv(data,data_fold);
+    //default value of sizeOf
+    if(isempty(sizeOf) || sizeOf <1) then
+    sizeOf = 10
+    end
+    y = ones(1,sizeOf)/sizeOf;
+    result = conv(data,y);
+endfunction
+/* Correlation
+R = w ; // o nl y Noise S i g n a l
+
+R_fold = mtlb_fliplr (R ) ;
+Received_Absence = conv (x , R_fold ) ; // 
+figure();
+plot(n,sqrt(Received_Presence(length(n)/2:length(n)/2+length(n)-1)), 'green', n, x, 'red');
+*/
+
+//Median filter: only need the data as an input
+function result = medianFilter(x)
+    z=[];
+    z(1) = median([0 0 x(1) x(2) x(3)]);
+    z(2) = median([0 x(1) x(2) x(3) x(4)]);
+    for i=3:length(x)-2
+        z(i)=median([x(i-2) x(i- 1) x(i) x(i + 1) x(i + 2)]);
+    end
+    result = z;
 endfunction
 
 /**
@@ -51,24 +122,3 @@ There are roughly 1000 / 60 = 16.667 samples in a complete cycle of 60 Hz when s
 sgolayfilt(u, 1, 17);
 **/
 
-/**
-
-def hampel_filter_forloop(input_series, window_size, n_sigmas=3):
-    
-    n = len(input_series)
-    new_series = input_series.copy()
-    k = 1.4826 # scale factor for Gaussian distribution
-    
-    indices = []
-    
-    # possibly use np.nanmedian 
-    for i in range((window_size),(n - window_size)):
-        x0 = np.median(input_series[(i - window_size):(i + window_size)])
-        S0 = k * np.median(np.abs(input_series[(i - window_size):(i + window_size)] - x0))
-        if (np.abs(input_series[i] - x0) > n_sigmas * S0):
-            new_series[i] = x0
-            indices.append(i)
-    
-    return new_series, indices
-    
-    **/

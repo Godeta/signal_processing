@@ -14,8 +14,8 @@ PATH_IMAGE = PATH + "title.jpg";
 chdir(PATH)
 getd('lib');
 // parameters
-listPeakText = 'none|find_extremum|peakfinder'; //replace 'find_extremum|peakfinder' 
-listFilteringText = 'none|convolution '; // replace 'median'
+listPeakText = 'none|find_extremum|peakfinder|localmax'; //replace 'find_extremum|peakfinder' 
+listFilteringText = 'none|convolution|circular convolution|median|hampel|moving average |sgolay filter'; // replace 'median'
 NB_DATA_FILES = 5;
 
 global dataProto
@@ -37,7 +37,7 @@ f=figure('figure_position',[-8,-8],'figure_size',[1552,840],'auto_resize','on','
 //////////
 handles.dummy = 0;
 handles.checkPlot=uicontrol(f,'unit','normalized','BackgroundColor',[0.1,0.1,0.1],'Enable','on','FontAngle','normal','FontName','Tahoma','FontSize',[12],'FontUnits','points','FontWeight','normal','ForegroundColor',[1,1,1],'HorizontalAlignment','left','ListboxTop',[],'Max',[1],'Min',[0],'Position',[0.6916026,0.2281633,0.2215385,0.0907029],'Relief','default','SliderStep',[0.01,0.1],'String','Plot charts','Style','checkbox','Value',[0],'VerticalAlignment','middle','Visible','on','Tag','checkPlot','Callback','checkPlot_callback(handles)')
-handles.listPeaks=uicontrol(f,'unit','normalized','BackgroundColor',[0.1,0.1,0.1],'Enable','on','FontAngle','normal','FontName','Tahoma','FontSize',[12],'FontUnits','points','FontWeight','normal','ForegroundColor',[1,1,1],'HorizontalAlignment','left','ListboxTop',[1],'Max',[1],'Min',[0],'Position',[0.0349359,0.1781633,0.2964744,0.1407029],'Relief','default','SliderStep',[0.01,0.1],'String',listPeakText,'Style','listbox','Value',[2],'VerticalAlignment','middle','Visible','on','Tag','listPeaks','Callback','listPeaks_callback(handles)')
+handles.listPeaks=uicontrol(f,'unit','normalized','BackgroundColor',[0.1,0.1,0.1],'Enable','on','FontAngle','normal','FontName','Tahoma','FontSize',[12],'FontUnits','points','FontWeight','normal','ForegroundColor',[1,1,1],'HorizontalAlignment','left','ListboxTop',[1],'Max',[1],'Min',[0],'Position',[0.0349359,0.1781633,0.2964744,0.1407029],'Relief','default','SliderStep',[0.01,0.1],'String',listPeakText,'Style','listbox','Value',[1],'VerticalAlignment','middle','Visible','on','Tag','listPeaks','Callback','listPeaks_callback(handles)')
 handles.title=uicontrol(f,'unit','normalized','BackgroundColor',[-1,-1,-1],'Enable','on','FontAngle','normal','FontName','Tahoma','FontSize',[12],'FontUnits','points','FontWeight','normal','ForegroundColor',[-1,-1,-1],'HorizontalAlignment','left','ListboxTop',[],'Max',[1],'Min',[0],'Position',[0.3516346,0.9024943,0.2996795,0.0952381],'Relief','default','SliderStep',[0.01,0.1],'String','title.jpg','Style','image','Value',[1,1,0,0,0],'VerticalAlignment','middle','Visible','on','Tag','title','Callback','title_callback(handles)')
 handles.vectorEntry=uicontrol(f,'unit','normalized','BackgroundColor',[0.2,0.6,0.8],'Enable','on','FontAngle','normal','FontName','Tahoma','FontSize',[12],'FontUnits','points','FontWeight','normal','ForegroundColor',[1,1,1],'HorizontalAlignment','center','ListboxTop',[],'Max',[1],'Min',[0],'Position',[0.3884936,0.5716326,0.2259615,0.138322],'Relief','default','SliderStep',[0.01,0.1],'String','[1/3 1/3 1/3]','Style','edit','Value',[0],'VerticalAlignment','middle','Visible','on','Tag','vectorEntry','Callback','')
 handles.listFilters=uicontrol(f,'unit','normalized','BackgroundColor',[0.1,0.1,0.1],'Enable','on','FontAngle','normal','FontName','Tahoma','FontSize',[12],'FontUnits','points','FontWeight','normal','ForegroundColor',[1,1,1],'HorizontalAlignment','left','ListboxTop',[1],'Max',[1],'Min',[0],'Position',[0.0349359,0.560907,0.2964744,0.1497732],'Relief','default','SliderStep',[0.01,0.1],'String',listFilteringText,'Style','listbox','Value',[1],'VerticalAlignment','middle','Visible','on','Tag','listFilters','Callback','listFilters_callback(handles)')
@@ -106,15 +106,24 @@ function listFilters_callback(handles)
         ref= csvRead(PATH+'\data_compare\capteurs'+string(i)+'.csv',",");
         
         //apply peak detection algorithm
-        //dataProto{i}(:,1)= convolution()
+            
+        //when we check the create filter box It will make a linear convolution using the text inside our vectorEntry box 
         if(get(handles.checkFilterCreation,"value")) then
-            [resultat1, resultat2]= convolution_process(proto(:,2), evstr(get(handles.vectorEntry,"String")),-1,get(handles.checkPdata,"value"))
-            dataProto{i}(:,2)=resultat1;
-           //disp(dataProto{i}(:,2))
-            //disp(get(handles.checkPlot,"value"))
+            //when whe chose circular convolution
+            if (choice2==3) then
+                [resultat1, resultat2]= circ_convolution_process(proto(:,2), evstr(get(handles.vectorEntry,"String")),-1,get(handles.checkPdata,"value"));
+                dataProto{i}(:,2)=resultat1;
+            else //linear convolution
+               [resultat1, resultat2]= convolution_process(proto(:,2), evstr(get(handles.vectorEntry,"String")),-1,get(handles.checkPdata,"value"));
+                dataProto{i}(:,2)=resultat1;
+               //disp(dataProto{i}(:,2))
+                //disp(get(handles.checkPlot,"value"))
             end
-        //[nbBouteille1, nbBouteilleRef1] = (proto(:,1),proto(:,2),-1,choice2, get(handles.checkPdata,"value"));
-        //[nbBouteille2, nbBouteilleRef2] = (ref(:,1),ref(:,2),ref(:,3),choice2, get(handles.checkPdata,"value"));
+        else
+            [resultat1, resultat2] = process_data(proto(:,2), -1, choice2, get(handles.checkPdata,"value"))
+            dataProto{i}(:,2)=resultat1;
+            end
+        
         
     end
     else 

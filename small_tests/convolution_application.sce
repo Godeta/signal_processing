@@ -60,11 +60,12 @@ plot(ref(:,1),ccirc'(length(y):$,1))
 title('Circular Convolution of xpad and ypad')
 //val = fft(data1)
 //val = fft(ccirc')
+/*
 figure;
 //plot(abs(val(1000:7000)/7035))
 title("Le filtre")
 [c, ind] = xcorr(data1, data1,60500 ,"none");
-plot(ind, c)
-/*
+plot(ind, c)*/
+figure;
 res = filter(y, 1, data1)
 plot(res)
