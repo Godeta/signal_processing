@@ -5,7 +5,7 @@ In this file I will put all functions related to peak detection
 clc;
 clear;
 // Function to detect peaks in the input array
-function peaks = detect_peaks(arr, longueur)
+function peaks = detect_peaks_naive(arr, longueur)
   // Allocate memory for the list of peak values
   peaks = zeros(longueur, 1);
 
@@ -24,7 +24,7 @@ arr = [1, 2, 3, 2, 1];
 // Get the longueur of the array
 longueur = length(arr);
 // Detect peaks in the array
-peaks = detect_peaks(arr, longueur);
+peaks = detect_peaks_naive(arr, longueur);
 // Show peak
 w=gca();
 peaks = peaks';
@@ -38,12 +38,16 @@ pl1=w.children(1);pl1.children.mark_foreground=5;  // in red
     Take in input the array and the sign
     If sign is positive it will output the local maximums
     If sign is negative it will output the local minimums
+    The way It works is that It will check if a value is an extremum among 8 of it's neighbours
+        Then It will check if the value makes sense so not above 1.2 times further than the average
 **/
 function [indice, value] = find_extremums(arr, signe)
   longueur = length(arr);
   // Allocate memory for the list of peak values
   peaks = zeros(longueur, 1);
-    ts=min(arr)+(max(arr)-min(arr))/20;
+//    ts=min(arr)+(max(arr)-3*min(arr))/20;
+    ts = 40; //distance minimale de 4 cm
+    disp(ts)
   // Loop through the input array and check for peaks
   for i = 5:longueur-5
       if(arr(i)>ts)
@@ -55,27 +59,53 @@ function [indice, value] = find_extremums(arr, signe)
       else
           if ((arr(i) < arr(i-1)) && (arr(i) < arr(i-2)) && (arr(i) < arr(i-3)) && (arr(i) < arr(i-4))) && (i == longueur || (arr(i) < arr(i+1) && (arr(i) < arr(i+2)) && (arr(i) < arr(i+3)) && (arr(i) < arr(i+4))))
               peaks(i) = arr(i);
+//              disp(peaks(i))
           end
       end
     end
   end
-value = arr(peaks>1);
+  
+  //test pour vérifier ma condition
+//  for i=980:990
+//      disp(arr(i));
+//      disp(i)
+//      disp(((arr(i) < arr(i-1)) && (arr(i) < arr(i-2)) && (arr(i) < arr(i-3)) && (arr(i) < arr(i-4))) && (i == longueur || (arr(i) < arr(i+1) && (arr(i) < arr(i+2)) && (arr(i) < arr(i+3)) && (arr(i) < arr(i+4)))))
+//      disp("- - -")
+//  end
+
+//création d'un stop en haut pour éviter de comptabiliser des valeurs irréalistes
+val = arr(peaks>1);
+avg = mean(val);
+highStop = avg*1.15;
+//disp(peaks>1)
+//disp(highStop);
+
+//on recréer un tableau qui dit pour chaque indice de notre vecteur de valeurs si on conserve la valeur ou non
+peaks2 = zeros(longueur, 1);
+for i = 5:longueur-5
+    if(peaks(i)>1 && arr(i)<highStop) then
+        peaks2(i)=arr(i);
+    end
+end
+value = val(val<highStop);
+//value = val;
 [r N]=size(arr);
 f = r*N*(1:N)/N   // frequency scale
 //disp(size(f))
-indice = f(peaks>1);
+indice = f(peaks2>1);
 endfunction
 
 //Exemple
-/**
-ref = csvRead('C:\devRoot\data\tests_uniformes\rouge_compo_4_REF.csv',",");
-a = ref(:,2)'; //transposée car opération prévue pour une matrice en colonne
-[indice,value] = find_extremums(a,1);
-w=gca();
-plot2d(a);
-plot2d(indice,value,-3);      // plot peaks
-pl1=w.children(1);pl1.children.mark_foreground=5;  // in red
-**/
+//PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
+//ref = csvRead(PATH+'\data_compare\proto3.csv',",");
+////ref = csvRead('C:\devRoot\data\tests_uniformes\rouge_compo_4_REF.csv',",");
+//a = ref(:,2)'; //transposée car opération prévue pour une matrice en colonne
+//[indice,value] = find_extremums(a,-1);
+//w=gca();
+//plot2d(a);
+//plot2d(indice,value,-3);      // plot peaks
+//pl1=w.children(1);pl1.children.mark_foreground=5;  // in red
+
 function [i, y] = localmax(x, s)
     // This function finds local maxima within vector x
     //
@@ -167,23 +197,24 @@ function [i, y] = localmax(x, s)
     end
 
 endfunction
-/**Exemple
-//ref = csvRead('C:\devRoot\data\capteurs_data_3.csv',",");
-ref = csvRead('C:\devRoot\data\tests_uniformes\bleu_compo_3_ident_REF.csv',",");
-a = ref(:,2)'; //transposée car opération prévue pour une matrice en colonne
-ts=min(a)+(max(a)-min(a))/20;
-[r N]=size(a);
-f = r*N*(1:N)/N   // frequency scale
-w=gca();
-plot2d(f,a);        // plot signal
-a(a<ts)=ts;
+////Exemple
+////ref = csvRead('C:\devRoot\data\capteurs_data_3.csv',",");
+//figure
+//ref = csvRead('C:\devRoot\data\tests_uniformes\bleu_compo_3_ident_REF.csv',",");
+//a = ref(:,2)'; //transposée car opération prévue pour une matrice en colonne
+//ts=min(a)+(max(a)-min(a))/20;
+//[r N]=size(a);
+//f = r*N*(1:N)/N   // frequency scale
+//w=gca();
+//plot2d(f,a);        // plot signal
+//a(a<ts)=ts;
+//
+//peaks=localmax(a,2);
+//
+//plot(f,ones(1,N)*ts,"b");            // plot threshold
+//plot2d(f(peaks),a(peaks),-3);      // plot peaks
+//pl1=w.children(1);pl1.children.mark_foreground=5;  // in red
 
-peaks=localmax(a,2);
-
-plot2d(f,ones(1,N)*ts);            // plot threshold
-plot2d(f(peaks),a(peaks),-3);      // plot peaks
-pl1=w.children(1);pl1.children.mark_foreground=5;  // in red
-**/
 
 function peaks=peak_detect(signal,threshold)
 
@@ -232,21 +263,20 @@ peaks=find(((Z<0 & d_s<0)|(Z==0 & d_s<0 & ddd_s>0)) & signal>ts);
 
 endfunction
 
-/** Exemple
-ref = csvRead('C:\devRoot\data\tests_uniformes\bleu_compo_3_ident_REF.csv',",");
-a = ref(:,2)'; //transposée car opération prévue pour une matrice en colonne
-[r N]=size(a);
-f = r*N*(1:N)/N   // frequency scale
-ts=min(a)+(max(a)-min(a))/20;
-a(a<ts)=ts;
-plot2d(f,a);        // plot signal
-
-peaks=peak_detect(a,ts);
-
-plot2d(f,ones(1,N)*ts);            // plot threshold
-//figure;
-plot2d(f(peaks),a(peaks),-3);      // plot peaks
-**/
+//// Exemple
+//ref = csvRead('C:\devRoot\data\tests_uniformes\bleu_compo_3_ident_REF.csv',",");
+//a = ref(:,2)'; //transposée car opération prévue pour une matrice en colonne
+//[r N]=size(a);
+//f = r*N*(1:N)/N   // frequency scale
+//ts=min(a)+(max(a)-min(a))/20;
+//a(a<ts)=ts;
+//plot2d(f,a);        // plot signal
+//
+//peaks=peak_detect(a,ts);
+//
+//plot2d(f,ones(1,N)*ts);            // plot threshold
+////figure;
+//plot2d(f(peaks),a(peaks),-3);      // plot peaks
 
 /**
 The function peakfinder takes in five input arguments:
@@ -423,53 +453,28 @@ a = ref(:,2)'; //transposée car opération prévue pour une matrice en colonne
 /**
     Détecte les minimums
 **/
-function [time,amp] = minima(signal, len)
-//
-// Finds the local minimum values of the given signal.
-// 
-// Usage:  [IND,AMP] = MINIMA(X, N);
-// 
-//         N is the number of points that need to be evaluated
-//           (Normally equal to LENGTH(X))
-//         X is the data 
-//         IND contains the indices of X that contain the minima data
-//         AMP contains the minima amplitudes
-//
-// Author: sparafucile17 10/02/2003
-
-//Initialize data
-index = 1;
-prev = signal(1);
-local_time = 0;
-local_amp = 0;
-prev_slope = 1;  //allow a maxima point at the second sample
-
-//prevent length error
-if(len > length(signal))
-   len = length(signal)
-end
-
-//Loop through data and find local minimums
-for loop_i=2:len
-   cur = signal(loop_i);
-   slope = cur - prev;
-   if((cur < prev) & (prev_slope > 0))  //Positive slope and amplitude dips
-      local_time(index) = loop_i-1;
-      local_amp(index) = prev;
-      index = index+1;
-   end
-   prev = cur;
-   prev_slope = slope;
-end
-
-//After loop assign data to output variables
-time = local_time;
-amp = local_amp;
+function [local_min,index] = find_local_min_in_noisy_signal(signal, window_size)
+  n = length(signal);
+  local_min = [];
+  index = [];
+  //taille min-max valeur acceptable
+  minVal = 40;
+  maxVal = min(signal(100:2000))/2+minVal;
+  for i = window_size+1 : n-window_size-1
+    window = signal(i-window_size : i+window_size);
+    min_value = min(window);
+    if signal(i) == min_value && signal(i)<maxVal && signal(i)>minVal && signal(i)<signal(i-1) && signal(i)<signal(i+1)
+      local_min = [local_min, signal(i)];
+      index = [index,i];
+    end
+  end
 endfunction
-/**
+
 //Exemple
-data1 = ref(:,2)
-[ind, amp] = minima(data1, length(data1))
-plot(data1, "b")
-plot(ind,amp, "r")
-**/
+//PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
+//ref = csvRead(PATH+'\data_compare\proto3.csv',",");
+//data1 = ref(:,2)
+//[amp,ind] = find_local_min_in_noisy_signal(data1, 10)
+//plot(data1, "b")
+//plot2d(ind,amp, -3)
+

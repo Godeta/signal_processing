@@ -172,8 +172,8 @@
         end
         //disp(value1);
         select funChoice
-        case 2 then
             //choix de la fonction find_extremums
+        case 2 then
             [indice,value]=find_extremums(value1', 1);
             result1 = value;
             if(value2 ~=-1)
@@ -191,13 +191,86 @@
                 pl1=w.children(1);pl1.children.mark_foreground=5;  // in red
             end
     end
-        case 3 then
             //choix de la fonction peakfinder
-            [value,indice] = peakfinder(value1,0.9,2,1,showChart); //plot or not directly included in the function
+        case 3 then
+            [value,indice] = peakfinder(val,0.9,2,1,showChart); //plot or not directly included in the function
             result1 = value;
             if(value2 ~=-1)
                 [value,indice] = peakfinder(value2,0.9,2,1,0);
                 result2=value;
+            else
+                result2=0;
+        end
+        
+            //choix de la fonction localmax
+        case 4 then
+            val = value1';
+            ts=min(val)+(max(val)-min(val))/2+0.5; //threshold
+            val(val<ts)=ts;
+            peaks=localmax(val,2);
+            result1 = val(peaks);
+            if(showChart==1) then
+                figure;
+                w=gca();
+//                disp(size(result1))
+//                disp(size(f(peaks)))
+                [r N]=size(val);
+                f = r*N*(1:N)/N   // frequency scale
+                plot2d(f,val);        // plot signal
+                disp("test ");
+                disp(ts)
+                plot(f,ones(1,N)*ts,"b");            // plot threshold
+                plot2d(f(peaks),result1,-3);      // plot peaks
+                pl1=w.children(1);pl1.children.mark_foreground=5;  // in red
+            end
+            if(value2 ~=-1)
+                val = value2';
+                ts=min(val)+(max(val)-min(val))/2+0.5; //threshold
+                val(val<ts)=ts;
+                peaks=localmax(val,2);
+                result2 = val(peaks);
+            else
+                result2=0;
+            end
+            
+            //choix de la fonction detect_peaks_naive
+            case 5 then
+            // Get the longueur of the array
+             longueur = length(value1);
+            // Detect peaks in the array
+            peaks = detect_peaks_naive(value1, longueur);
+            result1 = peaks;
+            if(showChart==1) then
+                figure;
+              // Show peak
+                w=gca();
+                peaks = peaks';
+                plot2d(1:1:longueur,value1);
+                plot2d(1:1:longueur,peaks, -3);
+                pl1=w.children(1);pl1.children.mark_foreground=5;  // in red
+             end
+            if(value2 ~=-1)
+                longueur = length(value2);
+            // Detect peaks in the array
+            peaks = detect_peaks_naive(value2, longueur);
+            result2 = peaks;
+            else
+                result2=0;
+            end
+            
+            //choix de la fonction local_min_noisy
+            case 6 then
+            [amp,ind] = find_local_min_in_noisy_signal(value1, 10)
+            result1 = amp;
+            
+            if(showChart==1)then
+                figure;
+                plot(value1, "b")
+                plot2d(ind,amp, -3)
+            end
+            if(value2 ~=-1)
+                [amp,ind] = find_local_min_in_noisy_signal(value1, 10)
+                result2=amp;
             else
                 result2=0;
         end

@@ -14,7 +14,7 @@ PATH_IMAGE = PATH + "title.jpg";
 chdir(PATH)
 getd('lib');
 // parameters
-listPeakText = 'none|find_extremum|peakfinder|localmax'; //replace 'find_extremum|peakfinder' 
+listPeakText = 'none|find_extremum|peakfinder|localmax|detect_peaks_naive|local_min_noisy'; //replace 'find_extremum|peakfinder' 
 listFilteringText = 'none|convolution|circular convolution|median|hampel|moving average |sgolay filter |customLap |Gauss filter |fast root mean square'; // replace 'median'
 NB_DATA_FILES = 5;
 
