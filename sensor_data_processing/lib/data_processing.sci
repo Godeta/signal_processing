@@ -5,7 +5,7 @@ Insirations : https://www.mathworks.com/help/signal/ug/signal-smoothing.html et 
 
 //convolution using a specified vector
 function result = convolution(data, weightVector, makeFilter)
-    disp(weightVector)
+//    disp(weightVector)
     if argn(2) < 3 || isempty(makeFilter)
             makeFilter = -1;
         end
@@ -19,7 +19,7 @@ function result = convolution(data, weightVector, makeFilter)
         y = weightVector;
 end
     //disp(y)
-    result = conv(data,y);
+    result = conv(data,y, "same");
 endfunction
 
 //circular convolution
@@ -43,7 +43,7 @@ end
     ypad = [y zeros(1,outputSize-L)];
     fx = fft(xpad, 1, 1)
     fy = fft(ypad)
-    ccirc = fft(fx.*fy,-1,1);
+    ccirc = abs(fft(fx.*fy,-1,1));
     result = ccirc'(length(y):$,1);
 endfunction
 
@@ -77,7 +77,7 @@ function result = moving_average(data,sizeOf)
     sizeOf = 10
     end
     y = ones(1,sizeOf)/sizeOf;
-    result = conv(data,y);
+    result = conv(data,y, "same");
 endfunction
 
 //correlation based on a radar processing exemple I found in a pdf document on scilab
@@ -90,7 +90,7 @@ function result = correlationR(data,sizeOf)
     sizeOf = 10
     end
     y = ones(1,sizeOf)/sizeOf;
-    result = conv(data,y);
+    result = conv(data,y, "same");
 endfunction
 /* Correlation
 R = w ; // o nl y Noise S i g n a l
@@ -106,6 +106,8 @@ function result = medianFilter(x)
     z=[];
     z(1) = median([0 0 x(1) x(2) x(3)]);
     z(2) = median([0 x(1) x(2) x(3) x(4)]);
+    z(length(x)-1) = median([0 x(1) x(2) x(3) x(4)]);
+    z(length(x)) = median([0 x(1) x(2) x(3) x(4)]);
     for i=3:length(x)-2
         z(i)=median([x(i-2) x(i- 1) x(i) x(i + 1) x(i + 2)]);
     end
@@ -141,12 +143,13 @@ function result = gaussFilter(data, sizeOf)
    gauss = exp(-(x/sizeOf).^2); // une forme de gaussienne d'épaisseur environ 10, soit a peu près la même chose que la petite boite
     gauss = gauss / sum(gauss); // Normalisation, pour que la convolution ne change pas la valeur moyenne
     result = conv(data, gauss,'same');
+//    disp(size(result));
 endfunction
 
 //fast root mean square
 function result = fMsqrt(data, sizeOf)
     y = ones(1,sizeOf)
-    clin = conv(data.^2,y)
+    clin = conv(data.^2,y, "same")
     result = sqrt(clin/sum(y))
 endfunction
 

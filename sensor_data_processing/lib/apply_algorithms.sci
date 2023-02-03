@@ -193,7 +193,7 @@
     end
             //choix de la fonction peakfinder
         case 3 then
-            [value,indice] = peakfinder(val,0.9,2,1,showChart); //plot or not directly included in the function
+            [value,indice] = peakfinder(value1,0.9,2,1,showChart); //plot or not directly included in the function
             result1 = value;
             if(value2 ~=-1)
                 [value,indice] = peakfinder(value2,0.9,2,1,0);
@@ -269,7 +269,7 @@
                 plot2d(ind,amp, -3)
             end
             if(value2 ~=-1)
-                [amp,ind] = find_local_min_in_noisy_signal(value1, 10)
+                [amp,ind] = find_local_min_in_noisy_signal(value2, 10)
                 result2=amp;
             else
                 result2=0;

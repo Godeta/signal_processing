@@ -45,9 +45,12 @@ function [indice, value] = find_extremums(arr, signe)
   longueur = length(arr);
   // Allocate memory for the list of peak values
   peaks = zeros(longueur, 1);
-//    ts=min(arr)+(max(arr)-3*min(arr))/20;
-    ts = 40; //distance minimale de 4 cm
-    disp(ts)
+    ts = abs(arr(1,100)+arr(1,1000)+arr(1,2000))/3; //moyenne de 3 valeurs random
+//    disp(ts)
+    if(ts>40) then
+        ts = 40; //distance minimale de 4 cm
+    end
+//    disp(ts)
   // Loop through the input array and check for peaks
   for i = 5:longueur-5
       if(arr(i)>ts)
@@ -307,7 +310,7 @@ if ~isreal(x0)
 end
 if argn(2) < 2 || isempty(sel)
     sel = (max(x0)-min(x0))/20;
-    disp(sel);
+//    disp(sel);
 elseif ~or(type(sel)==[1 5 8]) || ~isreal(sel) //si on a pas donné un nombre
     sel = (max(x0)-min(x0))/4;
     warning('PEAKFINDER:InvalidSel',...
@@ -458,7 +461,10 @@ function [local_min,index] = find_local_min_in_noisy_signal(signal, window_size)
   local_min = [];
   index = [];
   //taille min-max valeur acceptable
-  minVal = 40;
+    minVal=min(signal)+(max(signal)-3*min(signal))/20;
+    if(minVal>40) 
+        minVal = 40; //distance minimale de 4 cm
+    end
   maxVal = min(signal(100:2000))/2+minVal;
   for i = window_size+1 : n-window_size-1
     window = signal(i-window_size : i+window_size);
