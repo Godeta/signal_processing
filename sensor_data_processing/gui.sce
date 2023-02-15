@@ -17,7 +17,7 @@ getd('lib');
 listPeakText = 'none|find_extremum|peakfinder|localmax|detect_peaks_naive|local_min_noisy'; //replace 'find_extremum|peakfinder' 
 listFilteringText = 'none|convolution|circular convolution|median|hampel|moving average |sgolay filter |customLap |Gauss filter |fast root mean square'; // replace 'median'
 listPreProText = 'none|smoothIrregular|smoothDataGT|smoothDataRT|cutIrregular'; // replace 'none'
-NB_DATA_FILES = 5;
+NB_DATA_FILES = 11;
 
 global dataProto
 dataProto=cell(NB_DATA_FILES,1);

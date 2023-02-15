@@ -40,7 +40,7 @@
         disp("Mauvaise valeur pour le choix de fonction pour le traitement des données !\n");
         disp(string(funChoice))
     end
-    ////disp(name);
+    //disp(name);
         //affichage du résultat
             if(showChart==1)
                 disp("Afficher ? "+ string(showChart));
@@ -125,7 +125,7 @@
         disp("Mauvaise valeur pour le choix de fonction pour le traitement des données !\n");
         disp(string(funChoice))
     end
-    //disp(name);
+    disp(name);
     
         //affichage du résultat
             if(showChart==1)

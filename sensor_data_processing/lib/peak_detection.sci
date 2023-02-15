@@ -350,6 +350,12 @@ ind = find(dx0(1:$-1).*dx0(2:$) < 0)+1; // Find where the derivative changes sig
 // Include 
     x = x0(ind);
     minMag = min(x);
+//    disp(x(1))
+    if(isempty(x)) then //pour régler un bug qui arrivait je ne sais pas trop pourquoi
+        x=100;
+        end
+    
+//    disp(x0(1))
     leftMin = min(x(1), x0(1));
 
 // x only has the peaks, valleys, and possibly endpoints
