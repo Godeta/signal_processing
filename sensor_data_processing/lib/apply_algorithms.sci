@@ -1,6 +1,57 @@
 //  * get my functions
 
 /**
+    * Apply preprocessing on the data
+    funchoice is the function used to process the data
+    showChart display a chart of the data if it's value is 1
+**/
+    function result = preProcess_data(time, data, funChoice, showChart)
+        name = "undefined";
+        /**
+        preprocess data here
+        **/
+        select funChoice
+            //none
+     case 1 then
+         result = data;
+         name = "none"
+            //smoothIrregular
+        case 2 then
+            result = smoothIrregular(data);
+            name = "smoothIrregular"
+            
+            //smoothData with generated time
+        case 3 then
+            t = 1:prod(size(data));
+            result = smoothData(t',data, 5); //using generated time
+            name = "smoothDataGeneTime";
+            
+            //smoothData with the real time
+        case 4 then 
+            result = smoothData(time,data, 100); // using the real data time
+            name = "smoothDataRealTime"
+            
+            //cutIrregular
+        case 5 then
+            result = cutIrregular(data);
+            name = "cutIrregular";
+    else
+        result=0;
+        disp("Mauvaise valeur pour le choix de fonction pour le traitement des données !\n");
+        disp(string(funChoice))
+    end
+    ////disp(name);
+        //affichage du résultat
+            if(showChart==1)
+                disp("Afficher ? "+ string(showChart));
+                figure;
+                plot2d(result);
+                //nom plus ou moins unique pour comparer les données
+                xtitle(strcat(["Filter " name " data n° " string(data(1)) "-" string(data(100)) "-" string(data(1000))]));
+            end
+    endfunction
+
+/**
     * Apply data processing
     value2 is optionnal, if it is given then we are processing reference sensors data (Sick and Antenna)
     funchoice is the function used to process the data
@@ -74,6 +125,8 @@
         disp("Mauvaise valeur pour le choix de fonction pour le traitement des données !\n");
         disp(string(funChoice))
     end
+    //disp(name);
+    
         //affichage du résultat
             if(showChart==1)
                 disp("Afficher ? "+ string(showChart));

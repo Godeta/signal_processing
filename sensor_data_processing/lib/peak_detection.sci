@@ -2,8 +2,8 @@
 In this file I will put all functions related to peak detection
 
 **/
-clc;
-clear;
+//clc;
+//clear;
 // Function to detect peaks in the input array
 function peaks = detect_peaks_naive(arr, longueur)
   // Allocate memory for the list of peak values
@@ -466,6 +466,7 @@ function [local_min,index] = find_local_min_in_noisy_signal(signal, window_size)
         minVal = 40; //distance minimale de 4 cm
     end
   maxVal = min(signal(100:2000))/2+minVal;
+
   for i = window_size+1 : n-window_size-1
     window = signal(i-window_size : i+window_size);
     min_value = min(window);

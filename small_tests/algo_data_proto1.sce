@@ -309,7 +309,9 @@ endfunction
 //data = read('C:\devRoot\data\proto_data_1.dat',6124, 5);
 //data = read('C:\devRoot\data\proto_data_2.dat',7012, 5);
 //data = csvRead('C:\devRoot\data\proto_data_3.csv',",");
-data = csvRead('C:\devRoot\data\tests_uniformes\bleu_compo_3_ident_lentille_base.csv',",");
+//data = csvRead('C:\devRoot\data\tests_uniformes\bleu_compo_3_ident_lentille_base.csv',",");
+
+data = csvRead('C:\devRoot\data\tests_uniformes\lentille_bleu_6_ident_lampe.csv',",");
 //La première colonne correspond au temps
 t = data(:,1);
 //La deuxième colonne correspond aux distances brutes
@@ -323,7 +325,7 @@ detec = data(:,5);
 
 //Importation des données
 //capteurRef = read('C:\devRoot\data\capteurs_data.dat',4303, 3);
-capteurRef = csvRead('C:\devRoot\data\tests_uniformes\bleu_compo_3_ident_lentille_base_REF.csv',",");;
+capteurRef = csvRead('C:\devRoot\data\tests_uniformes\lentille_bleu_6_ident_lampe_REF.csv',",");
 //La première colonne correspond au temps
 t2 = capteurRef(:,1);
 //La deuxième colonne correspond aux Volt Sick
@@ -332,6 +334,11 @@ sick = capteurRef(:,2);
 antenne = capteurRef(:,3);
 
 title("Graphique données prototype");
+plot(data(:,3),'b');
+//Nom des axes
+xlabel('temps (unix)');
+ylabel('Distance brute (mm)');
+figure;
 //distM(find(distM>550))=0;
 
 //yi=smooth([t,distM],10);
@@ -380,6 +387,7 @@ for i = 3:prod(size(distM))
 end
 distM(isnan(minMax) | minMax==0)=600;
 */
+title("Graphique données traitées prototype");
 
 plot(distM,'b');
 //Nom des axes
@@ -389,4 +397,4 @@ ylabel('Distance brute (mm)');
 
 //val = max(distM)-min(distM)/4;
 //peakfinder(distM,val,-1);
-peakfinder(distM);
+peakfinder(data(:,3));
