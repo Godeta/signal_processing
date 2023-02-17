@@ -5,7 +5,7 @@
     funchoice is the function used to process the data
     showChart display a chart of the data if it's value is 1
 **/
-    function result = preProcess_data(time, data, funChoice, showChart)
+    function result = preProcess_data(detec, data, funChoice, showChart)
         name = "undefined";
         /**
         preprocess data here
@@ -26,10 +26,15 @@
             result = smoothData(t',data, 5); //using generated time
             name = "smoothDataGeneTime";
             
-            //smoothData with the real time
-        case 4 then 
-            result = smoothData(time,data, 100); // using the real data time
-            name = "smoothDataRealTime"
+//            this part doesn't work with the file proto9 and also it didn't give very good result so I just got rid of it
+//            //smoothData with the real time
+//        case 4 then 
+//            result = smoothData(time,data, 100); // using the real data time
+//            name = "smoothDataRealTime"
+
+        case 4 then
+            result= smartPreProcess(data,detec);
+            name="smartPreProcess";
             
             //cutIrregular
         case 5 then
@@ -125,7 +130,7 @@
         disp("Mauvaise valeur pour le choix de fonction pour le traitement des données !\n");
         disp(string(funChoice))
     end
-    disp(name);
+//    disp(name);
     
         //affichage du résultat
             if(showChart==1)
@@ -244,10 +249,11 @@
                 pl1=w.children(1);pl1.children.mark_foreground=5;  // in red
             end
     end
-            //choix de la fonction peakfinder
+            //choix de la fonction peakfinder qui détecte les sommets
         case 3 then
             [value,indice] = peakfinder(value1,0.9,2,1,showChart); //plot or not directly included in the function
             result1 = value;
+            
             if(value2 ~=-1)
                 [value,indice] = peakfinder(value2,0.9,2,1,0);
                 result2=value;
@@ -324,6 +330,19 @@
             if(value2 ~=-1)
                 [amp,ind] = find_local_min_in_noisy_signal(value2, 10)
                 result2=amp;
+            else
+                result2=0;
+        end
+        
+        //
+        //choix de la fonction peakfinder qui détecte les minimums
+        case 7 then
+            [value,indice] = peakfinder(value1,0.9,2,-1,showChart); //plot or not directly included in the function
+            result1 = value;
+            
+            if(value2 ~=-1)
+                [value,indice] = peakfinder(value2,0.9,2,1,0);
+                result2=value;
             else
                 result2=0;
         end

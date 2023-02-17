@@ -25,7 +25,7 @@ endfunction
 
 //Exemple
 //PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
-//ref = csvRead(PATH+'\data_compare\proto1.csv',",");
+//ref = csvRead(PATH+'\data_compare\proto9.csv',",");
 ////ref = csvRead('C:\devRoot\data\tests_uniformes\rouge_compo_4_REF.csv',",");
 //dat = ref(:,2); //transposée car opération prévue pour une matrice en colonne
 //new = smoothIrregular(dat);
@@ -39,14 +39,20 @@ endfunction
 **/
 function data = smoothData(time1, raw, power)
     time = unique(time1(2:$));
-    data = raw(1:prod(size(time))); //limit data size
-    data(isnan(data))=MAX_DIST;
-    data=smooth([time';data'],power)(2,:);
+    dat = raw(1:prod(size(time))); //limit data size
+    dat(isnan(dat))=MAX_DIST;
+    dat=smooth([time';dat'],power)(2,:);
+    TAILLE = prod(size(raw));
+    data = ones(1,TAILLE)*600;
+    for i=1:prod(size(dat))
+        data(i)=dat(i);
+    end
+    data = data';
 endfunction
 
 //Exemple
 //PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
-//ref = csvRead(PATH+'\data_compare\proto5.csv',",");
+//ref = csvRead(PATH+'\data_compare\proto1.csv',",");
 ////ref = csvRead('C:\devRoot\data\tests_uniformes\rouge_compo_4_REF.csv',",");
 //dat = ref(:,2);
 //t = 1:prod(size(dat));
@@ -56,26 +62,48 @@ endfunction
 //plot(dat, 'blue');
 //plot(new, 'red');      
 //plot(other, 'black');
-//legend("raw data", "preprocessed data");
+//legend("raw data", "preprocessed data gen", "preprocessed data real");
+
 /**
     Put all the unwanted data in a roof : over 60cm, undefined or 0
     Since we look at the local minimums this will allow us to avoid mistakes from incoherent data
 **/
 function data = cutIrregular(raw)
-    data = raw;
       for i = 3:prod(size(raw))
-    if(data(i)>MAX_DIST | isnan(data(i)) | data(i)==0) then
-        data(i)=MAX_DIST;
+    if(raw(i)>MAX_DIST | isnan(raw(i)) | raw(i)==0) then
+        raw(i)=MAX_DIST;
         end
-end
+   end
+    data = raw;
 endfunction
 
 //Exemple
 //PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
-//ref = csvRead(PATH+'\data_compare\proto1.csv',",");
+//ref = csvRead(PATH+'\data_compare\proto11.csv',",");
 ////ref = csvRead('C:\devRoot\data\tests_uniformes\rouge_compo_4_REF.csv',",");
 //dat = ref(:,2); //transposée car opération prévue pour une matrice en colonne
 //new = cutIrregular(dat);
+//w=gca();
+//plot(dat, 'blue');
+//plot(new, 'red');      // plot peaks
+//legend("raw data", "preprocessed data");
+
+/**
+    Process the data using the detected values of our prototype as well as the raw distance
+    With this we will only keep the data around the detected = true, set all the rest to 600 and then process our data
+**/
+
+function data = smartPreProcess(raw, detec)
+    raw(isnan(detec) | detec<1)=600; //if the distance value is not considered as detected then we put it to 600
+    data = cutIrregular(raw);
+endfunction
+
+//Exemple
+//PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
+//ref = csvRead(PATH+'\data_compare\proto5.csv',",");
+////ref = csvRead('C:\devRoot\data\tests_uniformes\rouge_compo_4_REF.csv',",");
+//dat = ref(:,2); //transposée car opération prévue pour une matrice en colonne
+//new = smartPreProcess(dat, ref(:,4));
 //w=gca();
 //plot(dat, 'blue');
 //plot(new, 'red');      // plot peaks

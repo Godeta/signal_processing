@@ -453,11 +453,13 @@ indice = peakInds;
 endfunction
 
 //Exemple
-/**
-ref = csvRead('C:\devRoot\data\tests_uniformes\rouge_compo_4_REF.csv',",");
-a = ref(:,2)'; //transposée car opération prévue pour une matrice en colonne
-[val,indice] = peakfinder(a,0.9,2,1,1);
-**/
+
+////ref = csvRead('C:\devRoot\data\tests_uniformes\rouge_compo_4_REF.csv',",");
+//PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
+//ref = csvRead(PATH+'\data_compare\proto3.csv',",");
+//a = ref(:,2)'; //transposée car opération prévue pour une matrice en colonne
+//[val,indice] = peakfinder(a,0.9,2,1,1);
+
 
 /**
     Détecte les minimums
@@ -491,3 +493,38 @@ endfunction
 //plot(data1, "b")
 //plot2d(ind,amp, -3)
 
+/**
+    Compte le nombre de bouteilles détectées en se basant sur le principe des données de réference
+    Donc si on détecte puis perd la détection on ajoute 1
+    Ce programme sert à s'assurer de la fiabilité du nombre de références
+**/
+function result = count_cylinders(signal)
+  n = length(signal);
+  count = 0;
+  for i=2:n
+      if(signal(i-1)>2 && signal(i) <2) then
+          count=count+1;
+      end
+      
+  end
+  result = count;
+endfunction
+
+//Exemple
+//PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
+//ref = csvRead(PATH+'\data_compare\capteurs11.csv',",");
+//data1 = ref(:,2)
+//result = count_cylinders(data1)
+//disp(result)
+//plot(data1)
+//title(string(result))
+
+for i=1:11
+    PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
+    ref = csvRead(PATH+'\data_compare\capteurs'+string(i)+ '.csv',",");
+    data1 = ref(:,2)
+//    result = count_cylinders(data1)
+    [value,indice] = peakfinder(data1,0.9,2,1,-1);
+    result = length(value);
+    disp(result)
+end

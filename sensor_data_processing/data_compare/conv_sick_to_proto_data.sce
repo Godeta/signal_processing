@@ -39,8 +39,8 @@ csvData{1,5} = "falseTrue";
         csvData{i+1,1}= string(time(i));
         csvData{i+1,2}= string(newValues(i));
         csvData{i+1,3}= string(0);
-        csvData{i+1,4}= string(0);//string(minMax(i));
-        csvData{i+1,5}= string(0);//string(falseTrue(i));
+        csvData{i+1,4}= string(1);//string(minMax(i));
+        csvData{i+1,5}= string(1);//string(falseTrue(i));
     end
     
 //write CSV
@@ -50,7 +50,7 @@ csvData{1,5} = "falseTrue";
     printf("############################################################################\n")
     printf("\n");
     RESU2 = mopen(PATH + "newProto" + ".csv",'w') ;
-    
+//    disp(csvData{11,4});
     for i=1:SIZE
 //        disp(strcat([csvData{i,1} "," csvData{i,2} "\n"]))
         mfprintf(RESU2,strcat([csvData{i,1} "," csvData{i,2} "," csvData{i,3} "," csvData{i,4} "," csvData{i,5} "\n"]));

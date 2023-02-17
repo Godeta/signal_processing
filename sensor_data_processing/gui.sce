@@ -6,7 +6,10 @@
 
 clc;
 clear;
-close()
+for i=1:25 //close 25 times the current window to make sure all open windows are closed
+    close()
+end
+
 
 //  * get my functions
 PATH = get_absolute_file_path("gui.sce");
@@ -16,7 +19,7 @@ getd('lib');
 // parameters
 listPeakText = 'none|find_extremum|peakfinder|localmax|detect_peaks_naive|local_min_noisy'; //replace 'find_extremum|peakfinder' 
 listFilteringText = 'none|convolution|circular convolution|median|hampel|moving average |sgolay filter |customLap |Gauss filter |fast root mean square'; // replace 'median'
-listPreProText = 'none|smoothIrregular|smoothDataGT|smoothDataRT|cutIrregular'; // replace 'none'
+listPreProText = 'none|smoothIrregular|smoothDataGT|smartPreProcess|cutIrregular'; // replace 'none'
 NB_DATA_FILES = 11;
 
 global dataProto
