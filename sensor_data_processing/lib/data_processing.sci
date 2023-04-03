@@ -137,12 +137,48 @@ function result = customLap(data)
     result = conv(data, y,'same');
 endfunction
 
+// User defined function to find linear convolution
+function y = linearconvolve(x,h)
+m = length(x);
+n = length(h);
+y = cell(n+m-1,1);
+//Method : Using Direct Convolution Sum Formula
+for i = 1:n+m-1
+//    disp(i)
+    conv_sum = 0;
+    for j = 1:i
+        if (((i-j+1) <= n)&(j <= m))
+            conv_sum = conv_sum + x(j)*h(i-j+1);
+        end;
+    end;    
+    y{j} = conv_sum;
+end;
+//disp(y)
+endfunction
+
 //filtering using gauss parabola
 function result = gaussFilter(data, sizeOf)
     x = [-sizeOf:sizeOf];
    gauss = exp(-(x/sizeOf).^2); // une forme de gaussienne d'épaisseur environ 10, soit a peu près la même chose que la petite boite
-    gauss = gauss / sum(gauss); // Normalisation, pour que la convolution ne change pas la valeur moyenne
-    result = conv(data, gauss,'same');
+   gauss = gauss / sum(gauss); // Normalisation, pour que la convolution ne change pas la valeur moyenne
+//    n=length(gauss)
+//    m=length(data)
+//    X=[data,zeros(1,n)]; 
+//    H=[gauss,zeros(1,m)]; 
+//    for i=1:n+m-1
+//     Y(i)=0;
+//        for j=1:m
+//            if(i-j+1>0)
+//                disp(i)
+//                disp(j)
+//                Y(i)=Y(i)+X(j)*H(i-j+1);
+//            else
+//        end
+//    end
+//end
+//     result = Y;
+    result = linearconvolve(data,gauss);
+//    result = conv(data, gauss,'same');
 //    disp(size(result));
 endfunction
 

@@ -13,14 +13,17 @@ end
 
 //  * get my functions
 PATH = get_absolute_file_path("gui.sce");
+P_PROTO = '\data_compare\test_capt_pro_';
+P_REF = '\data_compare\test_capt_pro_REF_';
 PATH_IMAGE = PATH + "title.jpg";
 chdir(PATH)
 getd('lib');
+
 // parameters
-listPeakText = 'none|find_extremum|peakfinder|localmax|detect_peaks_naive|local_min_noisy'; //replace 'find_extremum|peakfinder' 
+listPeakText = 'none|find_extremum|peakfinder|localmax|detect_peaks_naive|local_min_noisy | peakfinderMin'; //replace 'find_extremum|peakfinder' 
 listFilteringText = 'none|convolution|circular convolution|median|hampel|moving average |sgolay filter |customLap |Gauss filter |fast root mean square'; // replace 'median'
 listPreProText = 'none|smoothIrregular|smoothDataGT|smartPreProcess|cutIrregular'; // replace 'none'
-NB_DATA_FILES = 11;
+NB_DATA_FILES = 2;
 
 global dataProto
 dataProto=cell(NB_DATA_FILES,1);
@@ -28,8 +31,8 @@ dataRef = cell(NB_DATA_FILES,1);
 
 for i=1:NB_DATA_FILES //for as many data files as we have
          //get the data
-            dataProto{i}= csvRead(PATH+'\data_compare\proto'+string(i)+'.csv',",");
-            dataRef{i}= csvRead(PATH+'\data_compare\capteurs'+string(i)+'.csv',",");
+            dataProto{i}= csvRead(PATH+P_PROTO+string(i)+'.csv',",");
+            dataRef{i}= csvRead(PATH+P_REF+string(i)+'.csv',",");
 end
 
 
@@ -109,8 +112,8 @@ function listFilters_callback(handles)
       for i=1:NB_DATA_FILES //for as many data files as we have
         
         //get the data
-        proto= csvRead(PATH+'\data_compare\proto'+string(i)+'.csv',",");
-        ref= csvRead(PATH+'\data_compare\capteurs'+string(i)+'.csv',",");
+        proto= csvRead(PATH+P_PROTO+string(i)+'.csv',",");
+        ref= csvRead(PATH+P_REF+string(i)+'.csv',",");
         
         //apply peak detection algorithm
             
@@ -161,9 +164,9 @@ function startButton_callback(handles)
       for i=1:NB_DATA_FILES //for as many data files as we have
         
         //get the data
-        proto= csvRead(PATH+'\data_compare\proto'+string(i)+'.csv',",");
+        proto= csvRead(PATH+P_PROTO+string(i)+'.csv',",");
 //        proto = dataProto{i};
-        ref= csvRead(PATH+'\data_compare\capteurs'+string(i)+'.csv',",");
+        ref= csvRead(PATH+P_REF+string(i)+'.csv',",");
         
         //apply preprocessing
             resultat = preProcess_data(proto(:,1),proto(:,2), choice3, get(handles.checkPrePro,"value"))
@@ -179,7 +182,7 @@ end
         
         //get the data
         proto= dataProto{i};
-        ref= csvRead(PATH+'\data_compare\capteurs'+string(i)+'.csv',",");
+        ref= csvRead(PATH+P_REF+string(i)+'.csv',",");
         
         //when we check the create filter box It will make a linear convolution using the text inside our vectorEntry box 
         if(get(handles.checkFilterCreation,"value")) then
@@ -266,8 +269,8 @@ function listPreProc_callback(handles)
       for i=1:NB_DATA_FILES //for as many data files as we have
         
         //get the data
-        proto= csvRead(PATH+'\data_compare\proto'+string(i)+'.csv',",");
-        ref= csvRead(PATH+'\data_compare\capteurs'+string(i)+'.csv',",");
+        proto= csvRead(PATH+P_PROTO+string(i)+'.csv',",");
+        ref= csvRead(PATH+P_REF+string(i)+'.csv',",");
         
         //apply preprocessing
           

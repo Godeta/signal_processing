@@ -90,7 +90,7 @@ end
 **/
 
 NB_PRETREATMENT = 5;
-NB_TREATMENT = 10;
+NB_TREATMENT = 9;
 NB_DETEC = 5;
 CurrentLine = 1;
 

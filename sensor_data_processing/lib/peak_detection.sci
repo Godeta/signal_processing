@@ -441,9 +441,10 @@ if extrema < 0
     x0 = -x0;
 end
 
-//affichage et sortie des arguments
+//plot and result outputs
 if(plotPeaks==1)
     figure;
+//    disp(peakMags)
     plot(1:len0,x0,'.-',peakInds,peakMags,'ro','linewidth',2);
     xtitle("Nombre de bouteilles : "+string(length(peakMags)));
 end
@@ -454,11 +455,12 @@ endfunction
 
 //Exemple
 
-////ref = csvRead('C:\devRoot\data\tests_uniformes\rouge_compo_4_REF.csv',",");
+//ref = csvRead('C:\devRoot\data\tests_uniformes\rouge_compo_4_REF.csv',",");
 //PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
 //ref = csvRead(PATH+'\data_compare\proto3.csv',",");
 //a = ref(:,2)'; //transposée car opération prévue pour une matrice en colonne
-//[val,indice] = peakfinder(a,0.9,2,1,1);
+//[val,indice] = peakfinder(a,0.5,500,-1,1); //test modif sel et threeshold 
+//peakfinder(a,0.9,2,1,1);
 
 
 /**
@@ -519,12 +521,29 @@ endfunction
 //plot(data1)
 //title(string(result))
 
-for i=1:11
-    PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
-    ref = csvRead(PATH+'\data_compare\capteurs'+string(i)+ '.csv',",");
-    data1 = ref(:,2)
-//    result = count_cylinders(data1)
-    [value,indice] = peakfinder(data1,0.9,2,1,-1);
-    result = length(value);
-    disp(result)
-end
+//for i=1:11
+//    PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
+//    ref = csvRead(PATH+'\data_compare\capteurs'+string(i)+ '.csv',",");
+//    data1 = ref(:,2)
+////    result = count_cylinders(data1)
+//    [value,indice] = peakfinder(data1,0.9,2,1,-1);
+//    result = length(value);
+//    disp(result)
+//end
+
+////calcul dérivée 
+//n = length(new)-1
+//for i=1:n
+//    deriv(i)=new(i)-new(i+1)
+//end
+//plot(deriv, "red")
+//
+//  count = 0;
+//  for i=2:n
+//      if(deriv(i-1)<0 && deriv(i) >0) then
+//          count=count+1;
+//          ind(count)=i;
+//      end
+//end
+//scatter(ind,deriv(ind),10,"green");
+//title(string(count))

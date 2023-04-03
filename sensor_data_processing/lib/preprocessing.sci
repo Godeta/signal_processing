@@ -25,7 +25,7 @@ endfunction
 
 //Exemple
 //PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
-//ref = csvRead(PATH+'\data_compare\proto9.csv',",");
+//ref = csvRead(PATH+'\data_compare\proto1.csv',",");
 ////ref = csvRead('C:\devRoot\data\tests_uniformes\rouge_compo_4_REF.csv',",");
 //dat = ref(:,2); //transposée car opération prévue pour une matrice en colonne
 //new = smoothIrregular(dat);
@@ -103,8 +103,27 @@ endfunction
 //ref = csvRead(PATH+'\data_compare\proto5.csv',",");
 ////ref = csvRead('C:\devRoot\data\tests_uniformes\rouge_compo_4_REF.csv',",");
 //dat = ref(:,2); //transposée car opération prévue pour une matrice en colonne
-//new = smartPreProcess(dat, ref(:,4));
+//new = smartPreProcess(dat, ref(:,5));
 //w=gca();
 //plot(dat, 'blue');
 //plot(new, 'red');      // plot peaks
 //legend("raw data", "preprocessed data");
+//figure()
+//deriv = diff(new)
+//stuff = new(deriv>-1 & deriv<1)
+//plot(stuff)
+
+/*
+PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
+ref = csvRead(PATH+'\data_compare\prot1.csv',",");
+ref2 = csvRead(PATH+'\data_compare\prot2.csv',",");
+//ref = csvRead('C:\devRoot\data\tests_uniformes\rouge_compo_4_REF.csv',",");
+dat = ref(:,2); //transposée car opération prévue pour une matrice en colonne
+//new = smoothIrregular(dat);
+w=gca();
+plot(ref(:,6), ref(:,5), ref(:,6),dat );
+//plot(new, 'red');      // plot peaks
+legend("detec","raw data");
+figure()
+plot(ref2(:,6), ref2(:,5), ref2(:,6),ref2(:,2) );
+legend("detec","raw data");
