@@ -530,20 +530,3 @@ endfunction
 //    result = length(value);
 //    disp(result)
 //end
-
-////calcul dérivée 
-//n = length(new)-1
-//for i=1:n
-//    deriv(i)=new(i)-new(i+1)
-//end
-//plot(deriv, "red")
-//
-//  count = 0;
-//  for i=2:n
-//      if(deriv(i-1)<0 && deriv(i) >0) then
-//          count=count+1;
-//          ind(count)=i;
-//      end
-//end
-//scatter(ind,deriv(ind),10,"green");
-//title(string(count))

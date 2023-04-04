@@ -13,8 +13,8 @@ end
 
 //  * get my functions
 PATH = get_absolute_file_path("gui.sce");
-P_PROTO = '\data_compare\test_capt_pro_';
-P_REF = '\data_compare\test_capt_pro_REF_';
+P_PROTO = '\data_compare\proto';
+P_REF = '\data_compare\capteurs';
 PATH_IMAGE = PATH + "title.jpg";
 chdir(PATH)
 getd('lib');
@@ -23,7 +23,7 @@ getd('lib');
 listPeakText = 'none|find_extremum|peakfinder|localmax|detect_peaks_naive|local_min_noisy | peakfinderMin'; //replace 'find_extremum|peakfinder' 
 listFilteringText = 'none|convolution|circular convolution|median|hampel|moving average |sgolay filter |customLap |Gauss filter |fast root mean square'; // replace 'median'
 listPreProText = 'none|smoothIrregular|smoothDataGT|smartPreProcess|cutIrregular'; // replace 'none'
-NB_DATA_FILES = 2;
+NB_DATA_FILES = 11;
 
 global dataProto
 dataProto=cell(NB_DATA_FILES,1);

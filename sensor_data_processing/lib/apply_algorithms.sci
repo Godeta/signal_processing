@@ -50,13 +50,10 @@
             if(showChart==1)
                 disp("Afficher ? "+ string(showChart));
                 figure;
-//                plot2d(result);
-               // specify different sizes
-                x=1:length(result);
-                // set color map
-//                gcf().background=2;
-//                gcf().color_map = coolcolormap(64);
-                scatter(x,result, 10, x, "fill");
+                plot2d(result);
+               // other way to visualise with colors
+//                x=1:length(result);
+//                scatter(x,result, 10, x, "fill");
                 //nom plus ou moins unique pour comparer les données
                 xtitle(strcat(["Filter " name " data n° " string(data(1)) "-" string(data(100)) "-" string(data(1000))]));
             end
@@ -362,64 +359,4 @@
     endfunction
     
     
-    /**
-    test to compare the processing of raw data with scilab to the processing inside my sensor and checc If they are equal
-    **/
-    PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
-    P_PROTO = '\data_compare\test_capt_pro_';
-    P_REF = '\data_compare\test_capt_pro_REF_';
-    NB_DATA = 2;
     
-    //plot all data
-//    for(i=1:NB_DATA)
-//        close(); close(); //close the windows
-//        prot=csvRead(PATH+P_PROTO+string(i)+".csv",",");
-//        refe=csvRead(PATH+P_REF+string(i)+".csv",",");
-//        figure();
-//        siz=prod(size(prot(:,2)));
-//        time = 1:siz;
-//        plot(time,prot(:,2),time, prot(:,3));
-//        disp(length(peakfinder(prot(:,3),0.5,500,-1,1)));
-//        
-//        xtitle("Proto"+string(i));
-//        legend("Prepro", "Processed");
-//        figure();
-//        plot(refe(:,2));
-//        xtitle("Refe"+string(i));
-//        
-//        if(modulo(i,2)==0)then
-//            new = smoothIrregular(prot(:,2));
-//            result1 = gaussFilter(prot(:,2),21);
-//            figure();
-//            plot(time,new,time,result1); 
-//            xtitle("Scilab process data");
-//            legend("Prepro", "Gauss");
-//         end
-//            
-//        
-//    end
-    
-//    for i=1:20
-//        close()
-//    end
-prot=csvRead(PATH+P_PROTO+string(1)+".csv",",");
-refe=csvRead(PATH+P_REF+string(1)+".csv",",");
-result = count_cylinders(refe(:,2))
-disp(result)
-plot(refe(:,2))
-figure()
-
-    conv
-//sans scilab
-new = prot(:,2);
-result1 = prot(:,3);
-
-//avec scilab
-//new = smoothIrregular(prot(:,2));
-result1 = gaussFilter(new,21);
-
-plot(result1)
-
-disp(length(peakfinder(result1,10,500,-1,1)));
-disp(length(peakfinder(result1,0.9,2,1,1)));
-//disp(count_cylinders(prot(:,3)))

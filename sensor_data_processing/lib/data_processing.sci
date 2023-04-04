@@ -161,24 +161,7 @@ function result = gaussFilter(data, sizeOf)
     x = [-sizeOf:sizeOf];
    gauss = exp(-(x/sizeOf).^2); // une forme de gaussienne d'épaisseur environ 10, soit a peu près la même chose que la petite boite
    gauss = gauss / sum(gauss); // Normalisation, pour que la convolution ne change pas la valeur moyenne
-//    n=length(gauss)
-//    m=length(data)
-//    X=[data,zeros(1,n)]; 
-//    H=[gauss,zeros(1,m)]; 
-//    for i=1:n+m-1
-//     Y(i)=0;
-//        for j=1:m
-//            if(i-j+1>0)
-//                disp(i)
-//                disp(j)
-//                Y(i)=Y(i)+X(j)*H(i-j+1);
-//            else
-//        end
-//    end
-//end
-//     result = Y;
-    result = linearconvolve(data,gauss);
-//    result = conv(data, gauss,'same');
+    result = conv(data, gauss,'same');
 //    disp(size(result));
 endfunction
 
