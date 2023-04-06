@@ -348,7 +348,7 @@ dx0 = diff(x0); // Find derivative
 dx0(dx0 == 0) = -%eps; // This is so we find the first of repeated values
 ind = find(dx0(1:$-1).*dx0(2:$) < 0)+1; // Find where the derivative changes sign
 // Include 
-    x = x0(ind);
+    x = x0(ind); //tableau des valeurs de magnitude où on a un changement de signe
     minMag = min(x);
 //    disp(x(1))
     if(isempty(x)) then //pour régler un bug qui arrivait je ne sais pas trop pourquoi
@@ -356,6 +356,7 @@ ind = find(dx0(1:$-1).*dx0(2:$) < 0)+1; // Find where the derivative changes sig
         end
     
 //    disp(x0(1))
+//    disp(size(x))
     leftMin = min(x(1), x0(1));
 
 // x only has the peaks, valleys, and possibly endpoints
@@ -379,7 +380,7 @@ if len > 2 // Function with peaks and valleys
     cInd = 1;
     // Loop through extrema which should be peaks and then valleys
     while ii < len
-        ii = ii+1; // This is a peak
+        ii = ii+1; // increment search
         // Reset peak finding if we had a peak and the next peak is bigger
         //   than the last or the left min was small enough to reset.
         if foundPeak
@@ -445,8 +446,28 @@ end
 if(plotPeaks==1)
     figure;
 //    disp(peakMags)
-    plot(1:len0,x0,'.-',peakInds,peakMags,'ro','linewidth',2);
+    plot(1:len0,x0,'.-',peakInds,peakMags,'ro',ind,x,'go','linewidth',2);
     xtitle("Nombre de bouteilles : "+string(length(peakMags)));
+    
+    /*
+    for i=1:length(peakMags)
+    t=1:length(x0)
+    t=t'
+    disp(size(t))
+    dy=diff(x0)./diff(t)
+    k=peakInds(i); // point number 220
+    lgt = 50; //length of the tangent 
+    DECAL = 1; //number of points away from our detected minimum
+    t=t(k-lgt:k+lgt,1)
+    disp(size(t))
+    tang=(t-t(lgt+1))*dy(k)+x0(k)
+    tangPre=(t-t(lgt-DECAL+1))*dy(k-DECAL)+x0(k-DECAL)
+    tangPost=(t-t(lgt+DECAL))*dy(k+DECAL)+x0(k+DECAL)
+    plot(t,tang, "b",t,tangPre, "g", t,tangPost, "r")
+    scatter(t(lgt+1),x0(k))
+    legend("tan point "+string(i));
+    end
+    */
 end
 value = peakMags;
 indice = peakInds;
