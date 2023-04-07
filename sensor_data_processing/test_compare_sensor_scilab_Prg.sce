@@ -67,27 +67,50 @@
     
     //Circular Queue
     global CQ;
-    
-    return
+    global rear;
+    global front;
     //filtering using gauss parabola, full convolution
 function result = gaussCumulativeSum(data, sizeOf)
     global CQ;
+    global rear;
+    global front;
     x = [-sizeOf:sizeOf];
    gauss = exp(-(x/sizeOf).^2); // une forme de gaussienne d'épaisseur environ 10, soit a peu près la même chose que la petite boite
    gauss = gauss / sum(gauss); // Normalisation, pour que la convolution ne change pas la valeur moyenne
-   resultat =0;
    prev =0;
+   result = 600;
     //equivalent a mon appel de ma fonction de récup des données sur mon capteur
     for i=1:length(data)
-        //pour chaque valeur de mon noyau
-            for j=1:length(x)
-                    resultat = resultat + data(i)*gauss(modulo(i,length(x))+1) - prev * gauss(modulo(i-1,length(x))+1);
-                end
-        result(i)= resultat;
-//        disp(data(i)*gauss(modulo(i,length(x))+1))
-    end
-//    disp(size(result));
+        //circular queue not full
+        if(CQfull()==0)then
+            inser(data(i));
+            //circular queue full
+        else
+//            disp("O K");
+            delet();
+            inser(data(i));
+        end
+        //loop in the circular queue
+        ind = front; //indice in the CQ
+        count =1; //counter for our gauss kernel
+        resultat =0; //value
+        while ind~=rear
+//            disp("Indice :"+string(ind));
+//            disp(string(CQ(ind+1)));
+            resultat = resultat + CQ(ind+1)*gauss(count); //ind+1 because in scilab arrays start at 1...
+            ind = modulo(ind + 1,TAILLE);
+            count=count+1;
+        end
+                    //ind = rear, our last value
+              resultat = resultat + CQ(ind+1)*gauss(count);
+//            disp(ind)
+//            disp(count)
+//            disp(result)
+
+            result = cat(1,result,resultat);
+        end
 endfunction
+
     result2 = cutIrregular(prot(:,3));
     result2(1)=600;
     result2 = gaussCumulativeSum(result2,11);

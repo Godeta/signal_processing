@@ -1,5 +1,5 @@
     //Circular Queue
-    TAILLE = 11;
+    TAILLE = 22;
     global CQ;
     CQ = zeros(TAILLE);
     global rear;
@@ -11,10 +11,10 @@
     function rep = CQfull()
         global rear;
         global front;
+        rep = 0;
         if ((front == rear + 1) || (front == 0 && rear == TAILLE - 1)) then
             rep= 1;
             end
-        rep = 0;
     endfunction
     
     //insert
@@ -22,11 +22,11 @@
         global rear;
         global front;
         global CQ;
-        if(CQfull()) then
+        if(CQfull()==1) then
             disp("Queue overflow");
         else
             if(front== -1) then front =0; end
-            disp(rear)
+//            disp(rear)
             rear=modulo(rear+1,TAILLE);
             CQ(rear+1)=val;
         end
@@ -34,7 +34,7 @@
     endfunction
     
     //delete
-        function val = delet(val)
+        function val = delet()
         global rear;
         global front;
         global CQ;
@@ -57,16 +57,26 @@
         global rear;
         global front;
         global CQ;
-        disp("Front["+string(front)+"%d]->");
+        disp("Front["+string(front)+"]->");
         ind = front;
         while ind~=rear
+            disp("Indice :"+string(ind));
             disp(string(CQ(ind+1)));
             ind = modulo(ind + 1,TAILLE);
         end
+            disp("Dernier indice :"+string(ind));
             disp(string(CQ(ind+1)));
             disp("<-["+string(rear)+"]Rear");
     endfunction
     
+    //get data, start from front and increment with ind = modulo(ind + 1,TAILLE); stop when ind = rear
+    function CQgetVal(ind)
+        global rear;
+        global front;
+        global CQ;
+        
+    endfunction
+    /*
     //main program
     choice =0;
     while choice~=4 do
