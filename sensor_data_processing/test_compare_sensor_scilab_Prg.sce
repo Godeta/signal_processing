@@ -1,3 +1,4 @@
+
 /**
     This file is made of different tests to compare the results I got using Scilab to what I have using my C program in the sensor.
     There are 3 different steps to compare : the preprocessing, the process and the peak finding algorithm.
@@ -12,17 +13,53 @@
     **/
     //  * get my functions
     PATH = get_absolute_file_path("test_compare_sensor_scilab_Prg.sce");
-    P_PROTO = '\data_compare\scilab_sensor_compare_data\test_capt_pro_';
+    P_PROTO = '\data_compare\scilab_sensor_compare_data\solaris_3_blue_bottles_3_round+1'; //test_capt_pro_4_prepro_normal   ; full_data_3_blue_bottles_5_round  ;  clear_pc_3_blue_bottles_3_round  ; solaris_3_blue_bottles_3_round+1
     P_REF = '\data_compare\scilab_sensor_compare_data\test_capt_pro_REF_';
     chdir(PATH)
     getd('lib');
-    NB_DATA = 2;
     
     for i=1:20
         close()
     end
+    
+    /*
+    //test derivative loop
+    t = csvRead(PATH+P_PROTO+".csv",",")(:,4);
+    //t=[1 7 8 4 6 7 9 1 3 5 5 7 7 8 6 5 4 2 1 0 1 1 1 4 5 8 9 7 1 2 0 0 0 ];
+    
+    t0 = diff(t);
+    t0(t0 ==0) = -1;
+    ind = find(t0(1:$-1).*t0(2:$) < 0)+1;
+    
+    
+    prev = 0;
+    prev2 = 0;
+    tab = zeros(50,1);
+    t00 = zeros(length(t),1);
+    t002 = zeros(length(t),1);
+    count = 1;
+    for i = 1 : length(t)
+      tx = t(i)-prev;
+      if(tx==0)then tx=-1 end
+      t00(i) = tx;
+      tx2 = prev- prev2;
+      if(tx2==0)then tx2=-1 end
+      t002(i) = tx2;
+      
+      if(tx*tx2 <0 && i>1) then
+           tab(count) = i-1; //indice où changement signe de dérivée
+           count = count +1;
+           end
+      
+      prev2 = prev
+      prev = t(i)
+    end
+    
+    return
+    */
+    
     //test données, en 2 version prepro et 3 données brutes
-    prot=csvRead(PATH+P_PROTO+string("4_prepro_normal")+".csv",",");
+    prot=csvRead(PATH+P_PROTO+".csv",",");
     prepro = prot(:,2);
     brut = prot(:,3);
     sciPrepro = smoothIrregular(brut);
@@ -46,9 +83,92 @@
     //avec scilab
     //new = smoothIrregular(prot(:,2));
     result1 = gaussFilter(result1,11);
-    figure();
-    xtitle("Filtre gaussien sur le signal du capteur");
-    plot(result1)
+//    figure();
+//    xtitle("Filtre gaussien sur le signal du capteur");
+//    plot(result1)
+    
+    //sans scilab
+    result2 = prot(:,4);
+//    figure();
+//    xtitle("Signal traité par le capteur");
+//    plot(result2)
+
+    //detection
+    peakfinder(result1,20,[],-1,1)
+    peakfinder(result2,20,500,-1,1)
+    
+    //Circular Queue
+    global CQ;
+    global rear;
+    global front;
+    
+    /**
+    Function to detect peaks based upon the one in peak_detection.sci
+    **/
+    function [peakLoc, peakMag] = cumulativePeakDetection(data)
+        //1st step, imitate real time data gathering
+        prev = 0;
+        prev2 = 0;
+        ipdx =1;
+        ip2dx =1;
+        minMag = 600;//200;//data(100);
+        cInd = 1;
+        sel = 30;
+//        disp(minMag)
+//        leftMin = 0;
+//        tempMag = 600;
+//        foundPeak =0;
+        peakLoc = zeros(1,1);
+        peakMag = zeros(1,1);
+        
+    for i=1:length(data)
+//        if(isempty(data(i))) then //pour régler un bug qui arrivait je ne sais pas trop pourquoi
+//        data(i)=100;
+//        end
+        //dérivative
+        if(data(i)<minMag) then minMag = data(i); end
+        dx = data(i)-prev;
+        if(dx==0)then dx=-1 end
+        dx2 = prev- prev2;
+        if(dx2==0)then dx2=-1 end
+        //peak if change of sign in derivative
+        if(dx * dx2 <0 && i>1) then
+            //here we get the list of points where the derivative change
+//            peakLoc(cInd) = i-1;
+//            peakMag(cInd) = data(i-1);
+//            cInd = cInd +1;
+            if(data(ipdx)<data(ip2dx)+sel && data(ipdx) < minMag+sel) then
+                if(data(ipdx) < data(i)-sel) then
+                    disp("ipdx "+string(ipdx)+" ip2dx "+string(ip2dx)+ " data(i) "+string(i));
+                    disp("ipdx "+string(data(ipdx))+" ip2dx "+string(data(ip2dx))+ " data(i) "+string(data(i)));
+                    peakLoc(cInd) = ipdx-1;
+                    peakMag(cInd) = data(ipdx-1);
+                    cInd = cInd +1;
+                    disp("Pic "+string(cInd)+ " trouvé "+ string(ipdx)+ " "+ string(data(ipdx)));
+                end
+            end
+            
+            ip2dx = ipdx;
+            ipdx = i;
+            
+        end
+        
+
+        //update our values
+        prev2 = prev;
+//        p_dx2 = p_dx;
+        prev = data(i)
+//        p_dx = dx;
+    end
+    endfunction
+//    dx0 = diff(result1); // Find derivative
+//    dx0(dx0 == 0) = -%eps; // This is so we find the first of repeated values
+//    ind = find(dx0(1:$-1).*dx0(2:$) < 0)+1; // Find where the derivative changes sign
+    [ind, mag] = cumulativePeakDetection(result2);
+//    figure();
+    plot(ind, mag, "po");
+    disp(length(mag))
+    return
     
 //   trace tangent line
 //    figure()
@@ -65,10 +185,7 @@
 //    disp(length(peakfinder(result1,0.9,2,1,1)));
 //    disp(count_cylinders(prot(:,3)))
     
-    //Circular Queue
-    global CQ;
-    global rear;
-    global front;
+
     //filtering using gauss parabola, full convolution
 function result = gaussCumulativeSum(data, sizeOf)
     global CQ;

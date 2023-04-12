@@ -345,11 +345,13 @@ end
 x0 = extrema*x0(:); // Make it so we are finding maxima regardless
 thresh = thresh*extrema; // Adjust threshold according to extrema.
 dx0 = diff(x0); // Find derivative
-dx0(dx0 == 0) = -%eps; // This is so we find the first of repeated values
+dx0(dx0 == 0) = -1; // This is so we find the first of repeated values
 ind = find(dx0(1:$-1).*dx0(2:$) < 0)+1; // Find where the derivative changes sign
+disp(size(ind))
 // Include 
     x = x0(ind); //tableau des valeurs de magnitude où on a un changement de signe
-    minMag = min(x);
+    minMag = -200;//min(x); //ok avec = x(1)
+//    disp(minMag)
 //    disp(x(1))
     if(isempty(x)) then //pour régler un bug qui arrivait je ne sais pas trop pourquoi
         x=100;
@@ -357,8 +359,7 @@ ind = find(dx0(1:$-1).*dx0(2:$) < 0)+1; // Find where the derivative changes sig
     
 //    disp(x0(1))
 //    disp(size(x))
-    leftMin = min(x(1), x0(1));
-
+    leftMin = min(x(1), x0(1)); //ok avec = 0
 // x only has the peaks, valleys, and possibly endpoints
 len = prod(size(x));
 if len > 2 // Function with peaks and valleys
@@ -424,13 +425,13 @@ else // This is a monotone function where an endpoint is the only peak
         peakMags = [];
         peakInds = [];
 end
-// Apply threshold value.  Since always finding maxima it will always be
-//   larger than the thresh.
-if ~isempty(thresh)
-    m = peakMags>thresh;
-    peakInds = peakInds(m);
-    peakMags = peakMags(m);
-end
+//// Apply threshold value.  Since always finding maxima it will always be
+////   larger than the thresh.
+//if ~isempty(thresh)
+//    m = peakMags>thresh;
+//    peakInds = peakInds(m);
+//    peakMags = peakMags(m);
+//end
 // Rotate data if needed
 if flipData
     peakMags = peakMags.';

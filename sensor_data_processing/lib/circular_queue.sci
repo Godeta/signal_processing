@@ -68,14 +68,6 @@
             disp(string(CQ(ind+1)));
             disp("<-["+string(rear)+"]Rear");
     endfunction
-    
-    //get data, start from front and increment with ind = modulo(ind + 1,TAILLE); stop when ind = rear
-    function CQgetVal(ind)
-        global rear;
-        global front;
-        global CQ;
-        
-    endfunction
     /*
     //main program
     choice =0;
