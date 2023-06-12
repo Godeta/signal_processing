@@ -1,3 +1,4 @@
+/*
 // A GENERALAZED CONVOLUTION COMPUTING CODE IN MATLAB WITHOUT USING MATLAB BUILTIN FUNCTION conv(x,h)
 clear all
 function out = conv1(x,h)
@@ -67,7 +68,7 @@ test =cell2mat(s2)
 plot(test,'color',[0.8 0.2 0.1]);
 
 return
-
+*/
 // User defined function to find linear convolution
 function y = linearconvolve(x,h)
 m = length(x);
@@ -141,7 +142,7 @@ t = ref(3000:20000,1);
 plot(t,u)
 
 PetiteBoite = ones(1,11)/11; // on va moyenner sur une zone qui va de -5 à +5, soit 11 points en comptant celui du milieu.
-u_m1 = linearconvolve(u,PetiteBoite); // l'argument 'same' assure que la taille du signal de sortie est la même que le signal d'entrée u
+u_m1 = conv(u,PetiteBoite); // l'argument 'same' assure que la taille du signal de sortie est la même que le signal d'entrée u
 plot(u_m1); //line et plot fonctionnent un peu pareil, sauf que line évite d'avoir a utiliser "hold on' (plot efface tout par défaut), mais line a moins d'options que plot
 
 GrosseBoite = ones(1,201)/201; //cette fois on va de -50 à +50 points.
@@ -185,7 +186,8 @@ plot(t,u_lisse, 'g');
 u_sgolay = sgolayfilt(u, 3, 7); //sgolayfilt(u, 1, 17);
 plot(t, u_sgolay, "br");
 p = [3 0 0 0 0 0 0];
-y = horner(p,x);
+//y = horner(p,x);
+y = sgolayfilt(x, 1, 17)/17;
 test = "sgolay"
 
 
@@ -216,16 +218,16 @@ test = "sgolay"
 //plot(t, u_hampel, "r");
 //y = ind;
 //test = "Hampel"
-conv
+
 legend("Original","Moyenne petite ouverture", "Moyenne grande ouverture", "Gauss petite ouverture", test);
 
 //visualiser les filtres appliqués
 figure;
 title("Affichage des filtres")
-plot(gauss, "g")
+plot(gauss, "r")
 plot(PetiteBoite,"b")
 plot(GrosseBoite)
-plot(y,"r")
+plot(y,"y")
 
 legend("Gauss","Petite boite", "Grande boite", test);
 

@@ -523,14 +523,20 @@ endfunction
     Ce programme sert à s'assurer de la fiabilité du nombre de références
 **/
 function result = count_cylinders(signal)
+  tabLoc = zeros(1,1);
+  tabMag = zeros(1,1);
   n = length(signal);
   count = 0;
   for i=2:n
-      if(signal(i-1)>2 && signal(i) <2) then
+      if(signal(i-1)>=2 && signal(i) <2) then
           count=count+1;
+          tabLoc(count)=i-1;
+          tabMag(count)=signal(i-1);
       end
       
   end
+  plot(tabLoc,tabMag, "ro");
+  disp(size(tabLoc))
   result = count;
 endfunction
 
@@ -552,3 +558,178 @@ endfunction
 //    result = length(value);
 //    disp(result)
 //end
+
+/**
+    Function to detect peaks which works pretty well but not perfect
+    **/
+    function [derivLoc, derivMag,peakLoc, peakMag] = oldCumulativePeakDetection(data, sel, coef, minMag)
+        //1st step, imitate real time data gathering
+        prev = 0;
+        prev2 = 0;
+        ipdx =1;
+        ip2dx =1;
+        cInd = 1;
+        if argn(2) < 2 || isempty(sel) then sel = 30; end
+        if argn(2) < 3 || isempty(coef) then coef = 1.35; end
+        if argn(2) < 4 || isempty(minMag) then minMag = 100; end
+        derivLoc = zeros(1,1);
+        derivMag = zeros(1,1);
+        peakLoc = zeros(1,1);
+        peakMag = zeros(1,1);
+        cInd2 = 1;
+        
+    for i=1:length(data)
+//        if(isempty(data(i))) then //pour régler un bug qui arrivait je ne sais pas trop pourquoi
+//        data(i)=100;
+//        end
+        //dérivative
+        dx = data(i)-prev;
+        if(dx==0)then dx=-1 end
+        dx2 = prev- prev2;
+        if(dx2==0)then dx2=-1 end
+        //peak if change of sign in derivative
+        if(dx * dx2 <0 && i>1) then
+            indi = i-1;
+            if(data(indi)<minMag) then minMag = data(indi); end
+            //here we get the list of points where the derivative change
+            derivLoc(cInd2) = indi;
+            derivMag(cInd2) = data(indi);
+            cInd2 = cInd2 +1;
+            if(data(ipdx)<data(ip2dx)+sel && data(ipdx) < minMag*coef+sel) then
+                if(data(ipdx) < data(indi)-sel) then
+                    disp("val pre "+string(data(ip2dx)) + "val actuelle " + string(data(ipdx)));
+                    peakLoc(cInd) = ipdx;
+                    peakMag(cInd) = data(ipdx);
+                    cInd = cInd +1;
+                end
+            end
+            //update derivatives
+            if(data(ipdx) ~= data(indi) && data(ip2dx) ~= data(ipdx) && i>2)then
+            ip2dx = ipdx;
+            ipdx = indi;
+            end
+        end
+        //update our values
+        prev2 = prev;
+        prev = data(i)
+    end
+    endfunction
+
+    /**
+    Function to detect peaks based upon the one in peak_detection.sci
+    **/
+    function [derivLoc, derivMag,peakLoc, peakMag] = cumulativePeakDetection(data, sel, coef, minMag)
+        //1st step, imitate real time data gathering
+        prev = 0;
+        prev2 = 0;
+        ipdx =1;
+        ip2dx =1;
+        cInd = 1;
+        if argn(2) < 2 || isempty(sel) then sel = 30; end
+        if argn(2) < 3 || isempty(coef) then coef = 1.35; end
+        if argn(2) < 4 || isempty(minMag) then minMag = 100; end
+        derivLoc = zeros(1,1);
+        derivMag = zeros(1,1);
+        peakLoc = zeros(1,1);
+        peakMag = zeros(1,1);
+        cInd2 = 1;
+        
+    for i=1:length(data)
+//        if(isempty(data(i))) then //pour régler un bug qui arrivait je ne sais pas trop pourquoi
+//        data(i)=100;
+//        end
+        //dérivative
+        dx = data(i)-prev;
+        if(dx==0)then dx=-1 end
+        dx2 = prev- prev2;
+        if(dx2==0)then dx2=-1 end
+        //peak if change of sign in derivative
+        if(dx * dx2 <0 && i>1) then
+            if(data(i)<minMag) then minMag = data(i); end
+            //here we get the list of points where the derivative change
+            derivLoc(cInd2) = i-1;
+            derivMag(cInd2) = data(i-1);
+            cInd2 = cInd2 +1;
+            if(data(ipdx)<data(ip2dx)+sel && data(ipdx) < minMag*coef+sel) then
+                if(data(ipdx) < data(i)-sel) then
+//                    disp("val pre "+string(data(ip2dx)) + "val actuelle " + string(data(ipdx)));
+                    peakLoc(cInd) = ipdx-1;
+                    peakMag(cInd) = data(ipdx-1);
+                    cInd = cInd +1;
+                end
+            end
+            ip2dx = ipdx;
+            ipdx = i;
+        end
+        //update our values
+        prev2 = prev;
+        prev = data(i)
+    end
+    endfunction
+
+////Exemple
+//    PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
+//    P_PROTO = '\data_compare\scilab_sensor_compare_data\test_cumulative_count';
+//    prot=csvRead(PATH+P_PROTO+".csv",",");
+//    result2 = prot(:,4);
+//    [ii,ma,ind, mag] = cumulativePeakDetection(result2);
+//    plot(1:length(result2),result2,ii, -ma, "yo",ind, mag, "po");
+//    xtitle(" Detec cumulative : "+string(length(mag)))
+//    legend("Signal", "Detection algo scilab", "Changement dérivée", "Changement dérivé algo cumu" ,"Points détéctés algo cumu");
+
+    /**
+    Function to detect peaks based upon the one in peak_detection.sci
+    **/
+    function [derivLoc, derivMag,peakLoc, peakMag] = cumulativeThresholdPeakDetection(data, threshold)
+        //1st step, imitate real time data gathering
+        prev = 0;
+        prev2 = 0;
+        cInd = 1;
+        cInd2 = 1;
+        derivLoc = zeros(1,1);
+        derivMag = zeros(1,1);
+        peakLoc = zeros(1,1);
+        peakMag = zeros(1,1);
+        valid = 0;
+        
+    for i=1:length(data)
+//        if(isempty(data(i))) then //pour régler un bug qui arrivait je ne sais pas trop pourquoi
+//        data(i)=100;
+//        end
+        //dérivative
+        dx = data(i)-prev;
+        if(dx==0)then dx=-1 end
+        dx2 = prev- prev2;
+        if(dx2==0)then dx2=-1 end
+        //peak if change of sign in derivative
+        if(dx * dx2 <0 && i>1) then
+            //here we get the list of points where the derivative change
+            derivLoc(cInd2) = i-1;
+            derivMag(cInd2) = data(i-1);
+            cInd2 = cInd2 +1;
+            if(data(i) < threshold) then
+                valid = 1;
+            end
+            if(data(i)>threshold && valid == 1) then
+                    valid = 0;
+//                    disp("val pre "+string(data(ip2dx)) + "val actuelle " + string(data(ipdx)));
+                    peakLoc(cInd) = i-1;
+                    peakMag(cInd) = data(i-1);
+                    cInd = cInd +1;
+                end
+        end
+        //update our values
+        prev2 = prev;
+        prev = data(i)
+    end
+    endfunction
+
+////Exemple
+//    PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
+//    P_PROTO = '\data_compare\scilab_sensor_compare_data\test_cumulative_count';
+//    prot=csvRead(PATH+P_PROTO+".csv",",");
+//    result2 = prot(:,4);
+//    [ii,ma,ind, mag] = cumulativeThresholdPeakDetection(result2, 150);
+//    plot(1:length(result2),result2,ii, -ma, "yo",ind, mag, "po");
+//    xtitle(" Detec cumulative : "+string(length(mag)))
+//    legend("Signal", "Changement dérivée","Points détéctés algo cumu");

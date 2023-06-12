@@ -13,8 +13,8 @@
     **/
     //  * get my functions
     PATH = get_absolute_file_path("test_compare_sensor_scilab_Prg.sce");
-    P_PROTO = '\data_compare\scilab_sensor_compare_data\solaris_3_blue_bottles_3_round+1'; //test_capt_pro_4_prepro_normal   ; full_data_3_blue_bottles_5_round  ;  clear_pc_3_blue_bottles_3_round  ; solaris_3_blue_bottles_3_round+1
-    P_REF = '\data_compare\scilab_sensor_compare_data\test_capt_pro_REF_';
+    P_PROTO = '\data_compare\scilab_sensor_compare_data\light\5_taille_ident_detec_cumul'; //test_capt_pro_4_prepro_normal   ; full_data_3_blue_bottles_5_round  ;  clear_pc_3_blue_bottles_3_round  ; solaris_3_blue_bottles_3_round+1    ;   test_cumulative_count.csv   ;   test_cumulative_count_4_bot_rouge_compo    ;    test_cumulative_count_5_bot_divers
+    P_REF = '\data_compare\scilab_sensor_compare_data\light\6_rouge_compo_lampe_ref';
     chdir(PATH)
     getd('lib');
     
@@ -22,8 +22,50 @@
         close()
     end
     
+    //  -   -   -   -   -   compare reference data with our sensor data -   -   -   -   -
+    ref = csvRead(PATH+P_REF+'.csv',",");
+    data1 = ref(:,2)
+    result = count_cylinders(data1);
+    plot(data1);
+    title("Nb cylindre : "+string(result));
+    
+    figure();
+    prot=csvRead(PATH+P_PROTO+".csv",",");
+    result2 = prot(:,4);
+    [ii,ma,ind, mag] = cumulativePeakDetection(result2, 30, 1.35, 320);
+    plot(result2)
+    plot(ii, -ma, "yo", ind, mag, "po");
+    legend("Signal", "Points détéctés", "Bouteilles");
+    xtitle(" Detec cumulative : "+string(length(mag)))
+//    peakfinder(result2,30,500,-1,1)
+
+    figure();
+    prot=csvRead(PATH+P_PROTO+".csv",",");
+    result2 = prot(:,4);
+    [ii,ma,ind, mag] = oldCumulativePeakDetection(result2, 30, 1.35, 350);
+    plot(result2)
+    plot(ii, -ma, "yo", ind, mag, "po");
+    legend("Signal", "Points détéctés", "Bouteilles");
+    xtitle(" OLD Detec cumulative : "+string(length(mag)))
+
+    figure();
+    t = length(result2)
+    brut = prot(:,2);
+    prepro = prot(:,3);
+    plot(1:t, brut, "r", 1:t, prepro, "g", 1:t, result2,"b");
+    legend("Brut", "Preprocess", "Filtré");
+    xtitle("Données capteur");
+    
+    figure();
+    threshold = 365;
+    [ii2,ma2,ind2, mag2] = cumulativeThresholdPeakDetection(result2, threshold);
+    plot(1:length(result2),result2,ii2, -ma2, "yo",ind2, mag2, "po");
+    xtitle(" Detec thresh cumulative : "+string(length(mag2)))
+    legend("Signal", "Changement dérivée","Points détéctés algo cumu");
+    return
+    
     /*
-    //test derivative loop
+    //- -   -   -   test derivative loop    -   -   -   -   -
     t = csvRead(PATH+P_PROTO+".csv",",")(:,4);
     //t=[1 7 8 4 6 7 9 1 3 5 5 7 7 8 6 5 4 2 1 0 1 1 1 4 5 8 9 7 1 2 0 0 0 ];
     
@@ -58,7 +100,7 @@
     return
     */
     
-    //test données, en 2 version prepro et 3 données brutes
+    //test données, 
     prot=csvRead(PATH+P_PROTO+".csv",",");
     prepro = prot(:,2);
     brut = prot(:,3);
@@ -78,11 +120,11 @@
     
 //    //sans scilab
 //    new = prot(:,2);
-    result1 = cutIrregular(prot(:,3));
+//    result1 = cutIrregular(prot(:,3));
 //    
     //avec scilab
     //new = smoothIrregular(prot(:,2));
-    result1 = gaussFilter(result1,11);
+//    result1 = gaussFilter(result1,11);
 //    figure();
 //    xtitle("Filtre gaussien sur le signal du capteur");
 //    plot(result1)
@@ -94,18 +136,15 @@
 //    plot(result2)
 
     //detection
-    peakfinder(result1,20,[],-1,1)
+//    peakfinder(result1,20,[],-1,1)
     peakfinder(result2,20,500,-1,1)
     
-    //Circular Queue
-    global CQ;
-    global rear;
-    global front;
+
     
     /**
     Function to detect peaks based upon the one in peak_detection.sci
     **/
-    function [peakLoc, peakMag] = cumulativePeakDetection(data)
+    function [derivLoc, derivMag,peakLoc, peakMag] = cumulativePeakDetection(data)
         //1st step, imitate real time data gathering
         prev = 0;
         prev2 = 0;
@@ -118,33 +157,37 @@
 //        leftMin = 0;
 //        tempMag = 600;
 //        foundPeak =0;
+        derivLoc = zeros(1,1);
+        derivMag = zeros(1,1);
         peakLoc = zeros(1,1);
         peakMag = zeros(1,1);
+        cInd2 = 1;
         
     for i=1:length(data)
 //        if(isempty(data(i))) then //pour régler un bug qui arrivait je ne sais pas trop pourquoi
 //        data(i)=100;
 //        end
         //dérivative
-        if(data(i)<minMag) then minMag = data(i); end
         dx = data(i)-prev;
         if(dx==0)then dx=-1 end
         dx2 = prev- prev2;
         if(dx2==0)then dx2=-1 end
         //peak if change of sign in derivative
         if(dx * dx2 <0 && i>1) then
+            if(data(i)<minMag) then minMag = data(i); end
             //here we get the list of points where the derivative change
-//            peakLoc(cInd) = i-1;
-//            peakMag(cInd) = data(i-1);
-//            cInd = cInd +1;
-            if(data(ipdx)<data(ip2dx)+sel && data(ipdx) < minMag+sel) then
+            derivLoc(cInd2) = i-1;
+            derivMag(cInd2) = data(i-1);
+            cInd2 = cInd2 +1;
+            if(data(ipdx)<data(ip2dx)+sel && data(ipdx) < minMag*1.5+sel) then
                 if(data(ipdx) < data(i)-sel) then
-                    disp("ipdx "+string(ipdx)+" ip2dx "+string(ip2dx)+ " data(i) "+string(i));
-                    disp("ipdx "+string(data(ipdx))+" ip2dx "+string(data(ip2dx))+ " data(i) "+string(data(i)));
+//                    disp("ipdx "+string(ipdx)+" ip2dx "+string(ip2dx)+ " data(i) "+string(i));
+//                    disp("ipdx "+string(data(ipdx))+" ip2dx "+string(data(ip2dx))+ " data(i) "+string(data(i)));
                     peakLoc(cInd) = ipdx-1;
                     peakMag(cInd) = data(ipdx-1);
                     cInd = cInd +1;
-                    disp("Pic "+string(cInd)+ " trouvé "+ string(ipdx)+ " "+ string(data(ipdx)));
+//                    disp("Pic "+string(cInd)+ " trouvé "+ string(ipdx)+ " "+ string(data(ipdx)));
+                    disp(minMag)
                 end
             end
             
@@ -164,11 +207,19 @@
 //    dx0 = diff(result1); // Find derivative
 //    dx0(dx0 == 0) = -%eps; // This is so we find the first of repeated values
 //    ind = find(dx0(1:$-1).*dx0(2:$) < 0)+1; // Find where the derivative changes sign
-    [ind, mag] = cumulativePeakDetection(result2);
+    [ii,ma,ind, mag] = cumulativePeakDetection(result2);
 //    figure();
-    plot(ind, mag, "po");
-    disp(length(mag))
+    plot(ii, -ma, "yo",ind, mag, "po");
+    xtitle(" Detec cumulative : "+string(length(mag)))
+    legend("Signal", "Detection algo scilab", "Changement dérivée", "Changement dérivé algo cumu" ,"Points détéctés algo cumu");
     return
+    
+    //  -   -   -   -   -   Convolution in real time with circular queue    -   -   -   -   -
+    
+        //Circular Queue
+    global CQ;
+    global rear;
+    global front;
     
 //   trace tangent line
 //    figure()
@@ -215,6 +266,7 @@ function result = gaussCumulativeSum(data, sizeOf)
 //            disp("Indice :"+string(ind));
 //            disp(string(CQ(ind+1)));
             resultat = resultat + CQ(ind+1)*gauss(count); //ind+1 because in scilab arrays start at 1...
+
             ind = modulo(ind + 1,TAILLE);
             count=count+1;
         end
@@ -319,7 +371,7 @@ endfunction
 	}
 **/
     
-    //test Gauss
+    //  -   -   -   -   -   test Gauss  -   -   -   -   -
     PADDING = 12;
     processed = gaussFilter2(prepro, PADDING/2);
     lgth = length(processed);
