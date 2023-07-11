@@ -7,13 +7,14 @@
 **/
     clear;
     clc;
+    close();
 
 /**
     test to compare the processing of raw data with scilab to the processing inside my sensor and checc If they are equal
     **/
     //  * get my functions
     PATH = get_absolute_file_path("test_compare_sensor_scilab_Prg.sce");
-    P_PROTO = '\data_compare\scilab_sensor_compare_data\light\5_taille_ident_detec_cumul'; //test_capt_pro_4_prepro_normal   ; full_data_3_blue_bottles_5_round  ;  clear_pc_3_blue_bottles_3_round  ; solaris_3_blue_bottles_3_round+1    ;   test_cumulative_count.csv   ;   test_cumulative_count_4_bot_rouge_compo    ;    test_cumulative_count_5_bot_divers
+    P_PROTO = '\data_compare\scilab_sensor_compare_data\light\6_rouge_compo_lampe'; //test_capt_pro_4_prepro_normal   ; full_data_3_blue_bottles_5_round  ;  clear_pc_3_blue_bottles_3_round  ; solaris_3_blue_bottles_3_round+1    ;   test_cumulative_count.csv   ;   test_cumulative_count_4_bot_rouge_compo    ;    test_cumulative_count_5_bot_divers
     P_REF = '\data_compare\scilab_sensor_compare_data\light\6_rouge_compo_lampe_ref';
     chdir(PATH)
     getd('lib');

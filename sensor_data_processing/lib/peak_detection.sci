@@ -733,3 +733,157 @@ endfunction
 //    plot(1:length(result2),result2,ii, -ma, "yo",ind, mag, "po");
 //    xtitle(" Detec cumulative : "+string(length(mag)))
 //    legend("Signal", "Changement dérivée","Points détéctés algo cumu");
+
+    /**
+    Function to detect peaks based upon the one in peak_detection.sci
+    **/
+    function [derivLoc, derivMag,peakLoc, peakMag, endLoc, endMag] = autoThresholdPeakDetection(data, sel, coef)
+        //1st step, imitate real time data gathering
+        prev = 0;
+        prev2 = 0;
+        ipdx =1;
+        ip2dx =1;
+        valid = 0;
+        threshMag = 0;
+        if argn(2) < 2 || isempty(sel) then sel = 55; end
+        if argn(2) < 3 || isempty(coef) then coef = 1.35; end
+        minMag = 600;
+        MAXDIST=600;
+        derivLoc = zeros(1,1);
+        derivMag = zeros(1,1);
+        peakLoc = zeros(1,1);
+        peakMag = zeros(1,1);
+        endLoc = zeros(1,1);
+        endMag = zeros(1,1);
+        cInd = 1; //for peak and end tables
+        cInd2 = 1; //for deriv tables
+        
+    for i=1:length(data)
+//        if(isempty(data(i))) then //pour régler un bug qui arrivait je ne sais pas trop pourquoi
+//        data(i)=100;
+//        end
+        //dérivative
+        dx = data(i)-prev;
+        if(dx==0)then dx=-1 end
+        dx2 = prev- prev2;
+        if(dx2==0)then dx2=-1 end
+        //peak if change of sign in derivative
+        if(dx * dx2 <0 && i>1) then
+            
+            //update here to not lose one point in time
+            ip2dx = ipdx;
+            ipdx = i;
+            
+            //change minimum value=
+            if(data(i)<minMag) then minMag = data(i); end
+            //here we get the list of points where the derivative change
+            derivLoc(cInd2) = i-1;
+            derivMag(cInd2) = data(i-1);
+            cInd2 = cInd2 +1;
+            
+            //detect
+            if(data(ipdx)<data(ip2dx)-sel && data(ipdx) < minMag+sel && minMag+sel<MAXDIST) then //si la dérivée précédente est significativement inférieure à celle d'encore avant ET au minimum + 2 largeurs de bouteilles
+//                    disp("val pre "+string(data(ip2dx)) + "val actuelle " + string(data(ipdx)));
+                    peakLoc(cInd) = ipdx-1;
+                    peakMag(cInd) = data(ipdx-1);
+                    cInd = cInd +1;
+                    threshMag = minMag+ 55;
+                    minMag = 600;
+                    valid =1;
+            end
+            
+            
+            
+
+        end
+        //end detect
+            if(data(i) > threshMag) then
+                if(valid) then
+                    valid =0;
+                    endLoc(cInd)= i;
+                    endMag = data(i);
+                    end
+                end
+        //update our values
+        prev2 = prev;
+        prev = data(i);
+    end
+    endfunction
+
+////Exemple
+    PATH = "C:\devRoot\data\signal_processing\sensor_data_processing";
+    P_PROTO = '\data_compare\scilab_sensor_compare_data\test_cumulative_count';
+    prot=csvRead(PATH+P_PROTO+".csv",",");
+    result2 = prot(:,4);
+    [ii,ma,ind, mag, iend, mend] = autoThresholdPeakDetection(result2);
+    plot(1:length(result2),result2,ii, -ma, "yo",ind, mag, "po", iend, mend, "ro");
+    xtitle(" Autothreshold Detec : "+string(length(mag)))
+    legend("Signal", "Detection algo scilab", "Changement dérivée", "Fin threshold" ,"Points détéctés algo cumu");
+    
+    /**
+    -   -   REAL TIME C FUNCTION    -   -
+void autoThreshold(){
+
+	flag_min_detec = 0;
+
+	int currentVal = vl53l1x_get_distance();
+	int brut = currentVal;
+
+	currentVal = preprocess(brut, prev1, prev2);
+
+	int cleanVal = filterProcess(currentVal);
+
+	//search peak
+	int dx = cleanVal - preVal;
+	if(dx ==0) dx =-1;
+	int dx2 = preVal - preVal2;
+	if(dx2 ==0) dx2 =-1;
+
+	//SEND the data to the serial plot
+	uint32_t last_sigma = vl53l1_get_sigma();
+	uint32_t Last_signal = vl53l1x_get_rtn_signal_rate();
+
+	serial_debug_printf("%d,%d,%d,%d,%d,%d, %d\r\n", valid*500, cleanVal,last_sigma,Last_signal, currentVal, brut);
+
+
+	//peak if change of sign in derivative
+	        if(dx * dx2 <0 && preVal2 > 1) {
+	        	//update derivative here to avoid a delay of one point of change
+	        	prevDx2 = prevDx;
+	        	prevDx = cleanVal;
+
+	        	//minimum and threshold code
+	        	if(cleanVal < minMag) minMag = cleanVal; //change minMag value
+	        	if(cleanVal > maxMag) maxMag = cleanVal; //change maxMag value
+	        	//detection
+	        	if(prevDx < prevDx2-THRESH_MARGIN && prevDx < minMag+THRESH_MARGIN && minMag + THRESH_MARGIN < MAX_DIST) { //if we find a derivative significantly lower than the last one and It has an acceptable value
+
+	        		        	                		nbCylinder++; //see serial_debug.c
+	        		        	                		threshMag = minMag + THRESH_MARGIN;
+	        		        	                		minMag = 600; //reset minMag
+
+	        		        	                		valid = 1; //detection
+														led_set_status(LED_STATUS_THRESHOLD_ACTIVE);
+														setNamurOutputState(1);
+														flag_min_detec = 1;
+														HAL_Delay(50);
+	        		        	                	}
+
+	        	serial_debug_printf("%d,%d,%d,%d,%d,%d,%d \r\n", valid*500, cleanVal,last_sigma,Last_signal, currentVal, brut);
+	        }
+
+	        //end detect
+	        if(cleanVal > threshMag ) { //the threshold to consider the cylinder out is higher
+	        	        		        		if(valid ==1) {
+	        	        							valid = 0;
+	        										led_set_status(LED_STATUS_THRESHOLD_INACTIVE);
+	        										setNamurOutputState(0);
+	        	        		        		}
+	        	        		        	}
+	prev2 = prev1;
+	prev1 = currentVal;
+	preVal2=preVal;
+	preVal = cleanVal;
+
+	}
+**/
